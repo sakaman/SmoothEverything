@@ -13,30 +13,57 @@
 
     <Grid x:Name="RootGrid" Loaded="RootGrid_Loaded">
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
             <RowDefinition Height="40" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="42" />
         </Grid.RowDefinitions>
+
+        <Grid
+            x:Name="AppTitleBar"
+            Grid.Row="0"
+            Height="40"
+            Padding="12,0,144,0"
+            Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Image Width="18" Height="18" Source="Assets/AppIcon.png" />
+            <TextBlock
+                Grid.Column="1"
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                FontSize="12"
+                FontWeight="SemiBold"
+                Text="SmoothEverything" />
+        </Grid>
 
         <NavigationView
             x:Name="Navigation"
+            Grid.Row="1"
             AlwaysShowHeader="False"
+            Background="Transparent"
+            CompactPaneLength="56"
             IsBackButtonVisible="Collapsed"
             IsPaneOpen="False"
             IsSettingsVisible="False"
             IsPaneToggleButtonVisible="True"
+            OpenPaneLength="220"
             PaneDisplayMode="LeftCompact"
+            SelectionFollowsFocus="Enabled"
             SelectionChanged="Navigation_SelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="主页" IsSelected="True" Tag="home">
+                <NavigationViewItem Content="主页" IsSelected="True" Tag="home" ToolTipService.ToolTip="主页">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE80F;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="应用规则" Tag="applications">
+                <NavigationViewItem Content="应用规则" Tag="applications" ToolTipService.ToolTip="应用规则">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE71D;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="高级" Tag="advanced">
+                <NavigationViewItem Content="高级" Tag="advanced" ToolTipService.ToolTip="高级">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE713;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="诊断" Tag="diagnostics">
+                <NavigationViewItem Content="诊断" Tag="diagnostics" ToolTipService.ToolTip="诊断">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE9D9;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
@@ -44,8 +71,8 @@
         </NavigationView>
 
         <Border
-            Grid.Row="1"
-            Padding="16,0"
+            Grid.Row="2"
+            Padding="18,0"
             Background="{ThemeResource LayerFillColorDefaultBrush}"
             BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
             BorderThickness="0,1,0,0">
@@ -55,9 +82,25 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Ellipse x:Name="StatusDot" Width="8" Height="8" VerticalAlignment="Center" />
-                <TextBlock x:Name="StatusText" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="2" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Ctrl + Alt + S 快速开关" />
+                <Ellipse
+                    x:Name="StatusDot"
+                    Width="8"
+                    Height="8"
+                    VerticalAlignment="Center"
+                    Fill="{ThemeResource SystemFillColorCautionBrush}" />
+                <TextBlock
+                    x:Name="StatusText"
+                    Grid.Column="1"
+                    Margin="8,0,12,0"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    TextTrimming="CharacterEllipsis" />
+                <TextBlock
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    FontSize="12"
+                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                    Text="Ctrl + Alt + S  快速开关" />
             </Grid>
         </Border>
     </Grid>

@@ -10,8 +10,12 @@
     Unloaded="Page_Unloaded"
     mc:Ignorable="d">
 
-    <ScrollViewer HorizontalScrollBarVisibility="Disabled">
-        <StackPanel MaxWidth="900" Padding="32,28,32,48" Spacing="22" HorizontalAlignment="Stretch">
+    <ScrollViewer
+        HorizontalContentAlignment="Stretch"
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled">
+        <Grid HorizontalAlignment="Stretch">
+        <StackPanel MaxWidth="980" Margin="32,28,32,48" Spacing="22" HorizontalAlignment="Stretch">
             <StackPanel Spacing="6">
                 <TextBlock Style="{StaticResource PageTitleStyle}" Text="应用规则" />
                 <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="按可执行文件名直达兼容策略。排除项优先于独立配置。" />
@@ -143,5 +147,6 @@
                 </Border>
             </StackPanel>
         </StackPanel>
+        </Grid>
     </ScrollViewer>
 </Page>

@@ -19,11 +19,50 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        AppWindow.Resize(new SizeInt32(1040, 760));
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
+        ConfigureTitleBar();
+        AppWindow.Resize(new SizeInt32(1080, 780));
         AppWindow.Title = "SmoothEverything";
         AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"));
         _session.StateChanged += Session_StateChanged;
         ContentFrame.Navigate(typeof(HomePage));
+    }
+
+    private void ConfigureTitleBar()
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported())
+        {
+            return;
+        }
+
+        AppWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
+        AppWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        RootGrid.ActualThemeChanged += (_, _) => UpdateTitleBarButtonColors();
+        UpdateTitleBarButtonColors();
+    }
+
+    private void UpdateTitleBarButtonColors()
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported())
+        {
+            return;
+        }
+
+        var dark = RootGrid.ActualTheme == ElementTheme.Dark;
+        var foreground = dark ? Colors.White : Colors.Black;
+        AppWindow.TitleBar.ButtonForegroundColor = foreground;
+        AppWindow.TitleBar.ButtonHoverForegroundColor = foreground;
+        AppWindow.TitleBar.ButtonPressedForegroundColor = foreground;
+        AppWindow.TitleBar.ButtonInactiveForegroundColor = dark
+            ? ColorHelper.FromArgb(0x99, 0xFF, 0xFF, 0xFF)
+            : ColorHelper.FromArgb(0x99, 0x00, 0x00, 0x00);
+        AppWindow.TitleBar.ButtonHoverBackgroundColor = dark
+            ? ColorHelper.FromArgb(0x18, 0xFF, 0xFF, 0xFF)
+            : ColorHelper.FromArgb(0x10, 0x00, 0x00, 0x00);
+        AppWindow.TitleBar.ButtonPressedBackgroundColor = dark
+            ? ColorHelper.FromArgb(0x2A, 0xFF, 0xFF, 0xFF)
+            : ColorHelper.FromArgb(0x18, 0x00, 0x00, 0x00);
     }
 
     private async void RootGrid_Loaded(object sender, RoutedEventArgs e)
