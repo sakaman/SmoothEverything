@@ -1,0 +1,13 @@
+.vs/
+.vscode/
+.dotnet-home/
+.nuget/
+.nuget-feed/
+artifacts/
+build/
+out/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.log
