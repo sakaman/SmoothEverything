@@ -2,7 +2,7 @@
 
 SmoothEverything 是一个面向 Windows 10/11 的原生滚轮平滑工具。它以低延迟 Win32 后台引擎捕获传统鼠标滚轮输入，在独立工作线程中生成 125 Hz 平滑帧，并提供原生 C++/Win32 控制面板管理手感、应用规则和诊断信息。
 
-当前版本：`0.1.1`（x64 预览版）。
+当前版本：`0.1.2`（x64 预览版）。
 
 ## 已实现
 
@@ -52,7 +52,7 @@ pwsh .\scripts\Setup-Toolchain.ps1 -IncludeInstaller
 发布无外部运行时依赖的 x64 安装程序和便携压缩包：
 
 ```powershell
-pwsh .\scripts\Publish.ps1 -Version 0.1.1
+pwsh .\scripts\Publish.ps1 -Version 0.1.2
 ```
 
 输出位置：
@@ -75,8 +75,8 @@ SmoothEverything 的登录启动项，但保留 `%LocalAppData%\SmoothEverything
 校验文件：
 
 ```powershell
-git tag -a v0.1.1 -m "SmoothEverything v0.1.1"
-git push origin v0.1.1
+git tag -a v0.1.2 -m "SmoothEverything v0.1.2"
+git push origin v0.1.2
 ```
 
 也可以从 GitHub Actions 页面手动运行 Release 工作流，并选择一个已经存在的版本标签。
