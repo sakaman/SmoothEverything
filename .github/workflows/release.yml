@@ -102,7 +102,7 @@ jobs:
 
           - Use the installer for the normal per-user installation experience.
           - Use the portable archive when installation is not desired.
-          - This preview build is currently unsigned.
+          - This build is currently unsigned.
           "@
           $arguments = @(
             'release', 'create', $env:RELEASE_TAG,
@@ -114,10 +114,6 @@ jobs:
             '--notes', $notes,
             '--generate-notes'
           )
-          if ([Version]$env:RELEASE_VERSION -lt [Version]'1.0.0') {
-            $arguments += '--prerelease'
-          }
-
           & gh @arguments
           if ($LASTEXITCODE -ne 0) {
             throw 'GitHub release creation failed.'
