@@ -2,7 +2,7 @@
 
 SmoothEverything 是一个面向 Windows 10/11 的原生滚轮平滑工具。它以低延迟 Win32 后台引擎捕获传统鼠标滚轮输入，在独立工作线程中生成 125 Hz 平滑帧，并提供 WinUI 3 控制面板管理手感、应用规则和诊断信息。
 
-当前版本：`0.1.0`（x64 预览版）。
+当前版本：`0.1.1`（x64 预览版）。
 
 ## 已实现
 
@@ -43,6 +43,12 @@ pwsh .\scripts\Setup-Toolchain.ps1
 pwsh .\scripts\Build.ps1 -Configuration Debug
 ```
 
+如需生成安装程序，通过同一脚本使用 Scoop 安装 Inno Setup：
+
+```powershell
+pwsh .\scripts\Setup-Toolchain.ps1 -IncludeInstaller
+```
+
 如果本机 NuGet HTTPS 握手异常，可先通过 Scoop 安装 aria2：
 
 ```powershell
@@ -51,21 +57,41 @@ pwsh .\scripts\Setup-Toolchain.ps1 -IncludeNetworkWorkaround
 
 本仓库的构建脚本会优先使用工作区 `.nuget-feed` 中已存在的本地包；正常环境直接从 `NuGet.Config` 声明的 nuget.org 官方源还原。
 
-发布自包含 x64 压缩包：
+发布自包含 x64 安装程序和便携压缩包：
 
 ```powershell
-pwsh .\scripts\Publish.ps1
+pwsh .\scripts\Publish.ps1 -Version 0.1.1
 ```
 
 输出位置：
 
 - 原生构建：`artifacts/build/<debug|release>`
 - 发布目录：`artifacts/publish/win-x64`
-- 压缩包：`artifacts/SmoothEverything-0.1.0-win-x64.zip`
+- 安装程序：`artifacts/SmoothEverything-Setup-<version>-x64.exe`
+- 便携压缩包：`artifacts/SmoothEverything-<version>-win-x64.zip`
+- 校验文件：`artifacts/SHA256SUMS.txt`
+
+安装程序采用当前用户级安装，默认写入
+`%LocalAppData%\Programs\SmoothEverything`，不触发管理员权限申请。卸载时会移除
+SmoothEverything 的登录启动项，但保留 `%LocalAppData%\SmoothEverything` 中的用户配置。
+
+## 自动发布
+
+`main` 和拉取请求会运行 `.github/workflows/ci.yml`。推送格式为
+`vMAJOR.MINOR.PATCH` 的标签后，`.github/workflows/release.yml` 会在 Windows Runner
+上通过 Scoop 准备工具链，执行构建与测试，并自动上传安装程序、便携包和 SHA-256
+校验文件：
+
+```powershell
+git tag -a v0.1.1 -m "SmoothEverything v0.1.1"
+git push origin v0.1.1
+```
+
+也可以从 GitHub Actions 页面手动运行 Release 工作流，并选择一个已经存在的版本标签。
 
 ## 运行
 
-在同一发布目录中运行 `SmoothEverything.ControlPanel.exe`。如果后台引擎不在线，控制面板会启动同目录的 `SmoothEverything.Engine.exe`；也可以直接运行引擎并从通知区域打开控制面板。
+正常使用建议运行安装程序，然后从开始菜单启动 SmoothEverything。便携使用时，在同一发布目录中运行 `SmoothEverything.ControlPanel.exe`。如果后台引擎不在线，控制面板会启动同目录的 `SmoothEverything.Engine.exe`；也可以直接运行引擎并从通知区域打开控制面板。
 
 配置文件位于：
 
@@ -88,4 +114,4 @@ pwsh .\scripts\Publish.ps1
 - 仅构建和验证 x64。
 - 高分辨率设备判断目前基于滚轮增量小于 `WHEEL_DELTA` 的保守启发式，而不是厂商或设备白名单。
 - 第一次遇到未缓存的目标进程时，该次滚轮事件会原样放行；路径解析完成后才应用对应策略。
-- 预览版暂不提供安装器、代码签名或自动更新。
+- 预览版暂不提供代码签名或自动更新；安装程序和可执行文件会触发 Windows 的未知发布者提示。

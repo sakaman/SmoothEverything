@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Windows x64 build and test
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+
+      - name: Bootstrap Scoop
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
+            $installer = Join-Path $env:RUNNER_TEMP 'install-scoop.ps1'
+            Invoke-WebRequest -UseBasicParsing https://get.scoop.sh -OutFile $installer
+            & $installer -RunAsAdmin
+          }
+          $scoopShims = Join-Path $env:USERPROFILE 'scoop\shims'
+          Add-Content -LiteralPath $env:GITHUB_PATH -Value $scoopShims
+
+      - name: Install toolchain through Scoop
+        shell: pwsh
+        run: .\scripts\Setup-Toolchain.ps1
+
+      - name: Build and test
+        shell: pwsh
+        run: .\scripts\Build.ps1 -Configuration Release

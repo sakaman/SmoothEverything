@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [switch]$IncludeNetworkWorkaround
+    [switch]$IncludeNetworkWorkaround,
+    [switch]$IncludeInstaller
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,6 +27,14 @@ foreach ($package in $packages) {
     & scoop install $package
     if ($LASTEXITCODE -ne 0) {
         throw "Scoop failed to install $package."
+    }
+}
+
+if ($IncludeInstaller) {
+    $installerManifest = Join-Path $PSScriptRoot 'scoop\innosetup.json'
+    & scoop install $installerManifest
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Scoop failed to install Inno Setup from the pinned project manifest.'
     }
 }
 

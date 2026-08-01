@@ -56,6 +56,14 @@ add_executable(
     src/main.cpp
 )
 
+target_compile_definitions(
+    SmoothEverything.Engine
+    PRIVATE
+        SE_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+        SE_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+        SE_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+)
+
 target_include_directories(
     SmoothEverything.Engine
     PRIVATE

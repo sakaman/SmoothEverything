@@ -2,6 +2,8 @@
 param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Debug',
+    [ValidatePattern('^\d+\.\d+\.\d+$')]
+    [string]$Version = '0.1.1',
     [switch]$SkipRestore,
     [switch]$SkipTests
 )
@@ -37,7 +39,7 @@ $localFeed = Join-Path $repositoryRoot '.nuget-feed'
 
 Push-Location $repositoryRoot
 try {
-    & cmake --preset $preset
+    & cmake --preset $preset "-DSE_VERSION=$Version"
     if ($LASTEXITCODE -ne 0) { throw 'CMake configure failed.' }
     & cmake --build --preset $preset
     if ($LASTEXITCODE -ne 0) { throw 'Native build failed.' }
@@ -51,7 +53,15 @@ try {
         if ($LASTEXITCODE -ne 0) { throw 'WinUI dependency restore failed.' }
     }
 
-    & dotnet build $settingsProject -c $Configuration -p:Platform=x64 --no-restore --nologo
+    & dotnet build $settingsProject `
+        -c $Configuration `
+        -p:Platform=x64 `
+        "-p:Version=$Version" `
+        "-p:FileVersion=$Version.0" `
+        "-p:AssemblyVersion=$Version.0" `
+        "-p:InformationalVersion=$Version" `
+        --no-restore `
+        --nologo
     if ($LASTEXITCODE -ne 0) { throw 'Control panel build failed.' }
 
     $enginePath = Join-Path $repositoryRoot "artifacts\build\$preset\src\engine\SmoothEverything.Engine.exe"

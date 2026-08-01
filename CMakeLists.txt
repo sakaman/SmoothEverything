@@ -1,8 +1,13 @@
 cmake_minimum_required(VERSION 3.25)
 
+set(SE_VERSION "0.1.1" CACHE STRING "SmoothEverything release version")
+if(NOT SE_VERSION MATCHES "^[0-9]+[.][0-9]+[.][0-9]+$")
+    message(FATAL_ERROR "SE_VERSION must use numeric major.minor.patch format")
+endif()
+
 project(
     SmoothEverything
-    VERSION 0.1.0
+    VERSION "${SE_VERSION}"
     DESCRIPTION "Native Windows mouse-wheel smoothing"
     LANGUAGES CXX
 )

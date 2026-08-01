@@ -1,13 +1,30 @@
 #include <windows.h>
 #include "smootheverything/engine/resource.h"
 
+#ifndef SE_VERSION_MAJOR
+#define SE_VERSION_MAJOR 0
+#endif
+#ifndef SE_VERSION_MINOR
+#define SE_VERSION_MINOR 1
+#endif
+#ifndef SE_VERSION_PATCH
+#define SE_VERSION_PATCH 1
+#endif
+
+#define SE_STRINGIFY_IMPL(value) #value
+#define SE_STRINGIFY(value) SE_STRINGIFY_IMPL(value)
+#define SE_VERSION_TEXT \
+    SE_STRINGIFY(SE_VERSION_MAJOR) "." \
+    SE_STRINGIFY(SE_VERSION_MINOR) "." \
+    SE_STRINGIFY(SE_VERSION_PATCH)
+
 IDI_SMOOTHEVERYTHING ICON "assets/AppIcon.ico"
 
 1 RT_MANIFEST "engine.manifest"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,1,0,0
- PRODUCTVERSION 0,1,0,0
+ FILEVERSION SE_VERSION_MAJOR,SE_VERSION_MINOR,SE_VERSION_PATCH,0
+ PRODUCTVERSION SE_VERSION_MAJOR,SE_VERSION_MINOR,SE_VERSION_PATCH,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -24,11 +41,11 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "SmoothEverything Project\0"
             VALUE "FileDescription", "SmoothEverything background scroll engine\0"
-            VALUE "FileVersion", "0.1.0\0"
+            VALUE "FileVersion", SE_VERSION_TEXT "\0"
             VALUE "InternalName", "SmoothEverything.Engine\0"
             VALUE "OriginalFilename", "SmoothEverything.Engine.exe\0"
             VALUE "ProductName", "SmoothEverything\0"
-            VALUE "ProductVersion", "0.1.0\0"
+            VALUE "ProductVersion", SE_VERSION_TEXT "\0"
         END
     END
     BLOCK "VarFileInfo"

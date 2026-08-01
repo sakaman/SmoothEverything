@@ -1,0 +1,32 @@
+{
+  "version": "6.7.3",
+  "description": "Compiler for creating Windows installers",
+  "homepage": "https://jrsoftware.org/isinfo.php",
+  "license": "https://jrsoftware.org/files/is/license.txt",
+  "url": "https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe",
+  "hash": "9c73c3bae7ed48d44112a0f48e66742c00090bdb5bef71d9d3c056c66e97b732",
+  "installer": {
+    "script": [
+      "$installerArgs = @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/CURRENTUSER', '/NORESTART', '/NOICONS', \"/DIR=`\"$dir`\"\")",
+      "$process = Start-Process -FilePath \"$dir\\$fname\" -ArgumentList $installerArgs -Wait -PassThru",
+      "if ($process.ExitCode -ne 0) { throw \"Inno Setup installation failed with exit code $($process.ExitCode).\" }",
+      "Remove-Item -LiteralPath \"$dir\\$fname\" -Force"
+    ]
+  },
+  "uninstaller": {
+    "script": [
+      "$process = Start-Process -FilePath \"$dir\\unins000.exe\" -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') -Wait -PassThru",
+      "if ($process.ExitCode -ne 0) { throw \"Inno Setup removal failed with exit code $($process.ExitCode).\" }"
+    ]
+  },
+  "bin": [
+    "Compil32.exe",
+    "ISCC.exe"
+  ],
+  "shortcuts": [
+    [
+      "Compil32.exe",
+      "Inno Setup Compiler"
+    ]
+  ]
+}
