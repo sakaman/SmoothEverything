@@ -15,6 +15,7 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "SE_BUILD_ENGINE": "ON",
+        "SE_BUILD_CONTROL_PANEL": "ON",
         "SE_BUILD_TESTS": "ON"
       }
     },
@@ -26,6 +27,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "SE_BUILD_ENGINE": "ON",
+        "SE_BUILD_CONTROL_PANEL": "ON",
         "SE_BUILD_TESTS": "ON"
       }
     }

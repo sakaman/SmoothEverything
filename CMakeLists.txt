@@ -17,12 +17,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(SE_BUILD_ENGINE "Build the Win32 background engine" ON)
+option(SE_BUILD_CONTROL_PANEL "Build the native Win32 control panel" ON)
 option(SE_BUILD_TESTS "Build deterministic unit tests" ON)
 
 add_subdirectory(src/core)
 
 if(SE_BUILD_ENGINE AND WIN32)
     add_subdirectory(src/engine)
+endif()
+
+if(SE_BUILD_CONTROL_PANEL AND WIN32)
+    add_subdirectory(src/control_panel)
 endif()
 
 if(SE_BUILD_TESTS)

@@ -28,6 +28,13 @@ else()
             -Wconversion
             -Wsign-conversion
     )
+    target_link_options(
+        SmoothEverything.CoreTests
+        PRIVATE
+            -static
+            -static-libgcc
+            -static-libstdc++
+    )
 endif()
 
 add_test(NAME core.motion COMMAND SmoothEverything.CoreTests)

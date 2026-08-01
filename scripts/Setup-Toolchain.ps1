@@ -16,9 +16,6 @@ $packages = @(
     'ninja',
     'mingw-mstorsjo-llvm-ucrt'
 )
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
-    $packages += 'dotnet-sdk'
-}
 if ($IncludeNetworkWorkaround) {
     $packages += 'aria2'
 }

@@ -2,7 +2,6 @@
 param(
     [ValidatePattern('^\d+\.\d+\.\d+$')]
     [string]$Version = '0.1.1',
-    [switch]$FrameworkDependent,
     [switch]$SkipInstaller
 )
 
@@ -15,12 +14,6 @@ if ($LASTEXITCODE -ne 0) {
     throw 'Release build failed.'
 }
 
-$env:DOTNET_CLI_HOME = Join-Path $repositoryRoot '.dotnet-home'
-$env:NUGET_PACKAGES = Join-Path $repositoryRoot '.nuget\packages'
-$env:DOTNET_NOLOGO = '1'
-$settingsProject = Join-Path $repositoryRoot 'src\settings\SmoothEverything.Settings.csproj'
-$nugetConfig = Join-Path $repositoryRoot 'NuGet.Config'
-$localFeed = Join-Path $repositoryRoot '.nuget-feed'
 $publishDirectory = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot 'artifacts\publish\win-x64'))
 $publishRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot 'artifacts\publish'))
 if (-not $publishDirectory.StartsWith($publishRoot + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
@@ -31,43 +24,16 @@ if (Test-Path -LiteralPath $publishDirectory) {
 }
 New-Item -ItemType Directory -Path $publishDirectory -Force | Out-Null
 
-$selfContained = if ($FrameworkDependent) { 'false' } else { 'true' }
-$restoreArguments = @(
-    'restore',
-    $settingsProject,
-    '--runtime', 'win-x64',
-    "-p:SelfContained=$selfContained",
-    '--configfile', $nugetConfig
+$nativeOutputs = @(
+    (Join-Path $repositoryRoot 'artifacts\build\release\src\control_panel\SmoothEverything.ControlPanel.exe')
+    (Join-Path $repositoryRoot 'artifacts\build\release\src\engine\SmoothEverything.Engine.exe')
 )
-if (Test-Path -LiteralPath (Join-Path $localFeed 'microsoft.windowsappsdk.1.8.260317003.nupkg')) {
-    $restoreArguments += @('--source', $localFeed)
+foreach ($nativeOutput in $nativeOutputs) {
+    if (-not (Test-Path -LiteralPath $nativeOutput -PathType Leaf)) {
+        throw "Native release output was not created: $nativeOutput"
+    }
+    Copy-Item -LiteralPath $nativeOutput -Destination $publishDirectory -Force
 }
-& dotnet @restoreArguments
-if ($LASTEXITCODE -ne 0) {
-    throw 'Publish dependency restore failed.'
-}
-
-& dotnet publish $settingsProject `
-    -c Release `
-    -r win-x64 `
-    --self-contained $selfContained `
-    -p:Platform=x64 `
-    "-p:Version=$Version" `
-    "-p:FileVersion=$Version.0" `
-    "-p:AssemblyVersion=$Version.0" `
-    "-p:InformationalVersion=$Version" `
-    -p:PublishTrimmed=false `
-    -o $publishDirectory `
-    --no-restore `
-    --nologo
-if ($LASTEXITCODE -ne 0) {
-    throw 'Control panel publish failed.'
-}
-
-Copy-Item `
-    -LiteralPath (Join-Path $repositoryRoot 'artifacts\build\release\src\engine\SmoothEverything.Engine.exe') `
-    -Destination $publishDirectory `
-    -Force
 Copy-Item -LiteralPath (Join-Path $repositoryRoot 'README.md') -Destination $publishDirectory -Force
 
 $archivePath = Join-Path $repositoryRoot "artifacts\SmoothEverything-$Version-win-x64.zip"

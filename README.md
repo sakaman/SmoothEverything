@@ -1,6 +1,6 @@
 # SmoothEverything
 
-SmoothEverything 是一个面向 Windows 10/11 的原生滚轮平滑工具。它以低延迟 Win32 后台引擎捕获传统鼠标滚轮输入，在独立工作线程中生成 125 Hz 平滑帧，并提供 WinUI 3 控制面板管理手感、应用规则和诊断信息。
+SmoothEverything 是一个面向 Windows 10/11 的原生滚轮平滑工具。它以低延迟 Win32 后台引擎捕获传统鼠标滚轮输入，在独立工作线程中生成 125 Hz 平滑帧，并提供原生 C++/Win32 控制面板管理手感、应用规则和诊断信息。
 
 当前版本：`0.1.1`（x64 预览版）。
 
@@ -12,7 +12,7 @@ SmoothEverything 是一个面向 Windows 10/11 的原生滚轮平滑工具。它
 - 按可执行文件名排除应用，或为应用保存独立运动参数和兼容模式。
 - Ctrl / Alt 组合键放行，以及高分辨率小增量输入放行。
 - 当前用户登录启动、通知区域菜单和 `Ctrl + Alt + S` 快速开关。
-- WinUI 3 控制面板：主页、应用规则、高级选项、实时诊断。
+- 原生 Win32 控制面板：主页、应用规则、高级选项、实时诊断。
 - 同一用户可访问的命名管道热更新；配置采用原子替换保存。
 - 队列溢出、目标不可访问或输入注入失败时直接放行原始滚动。
 
@@ -26,7 +26,7 @@ flowchart LR
     Hook -->|"固定容量 SPSC 队列"| Worker["125 Hz 运动工作线程"]
     Worker -->|"SendInput + 自有标记"| Target["光标下的目标窗口"]
     Hook --> Policy["按进程缓存的应用策略"]
-    Panel["WinUI 3 控制面板"] -->|"当前用户命名管道"| Engine["Win32 后台引擎"]
+    Panel["C++/Win32 控制面板"] -->|"当前用户命名管道"| Engine["Win32 后台引擎"]
     Engine --> Store["%LocalAppData%/SmoothEverything/settings.json"]
     Engine --> Hook
     Policy --> Worker
@@ -49,15 +49,7 @@ pwsh .\scripts\Build.ps1 -Configuration Debug
 pwsh .\scripts\Setup-Toolchain.ps1 -IncludeInstaller
 ```
 
-如果本机 NuGet HTTPS 握手异常，可先通过 Scoop 安装 aria2：
-
-```powershell
-pwsh .\scripts\Setup-Toolchain.ps1 -IncludeNetworkWorkaround
-```
-
-本仓库的构建脚本会优先使用工作区 `.nuget-feed` 中已存在的本地包；正常环境直接从 `NuGet.Config` 声明的 nuget.org 官方源还原。
-
-发布自包含 x64 安装程序和便携压缩包：
+发布无外部运行时依赖的 x64 安装程序和便携压缩包：
 
 ```powershell
 pwsh .\scripts\Publish.ps1 -Version 0.1.1
@@ -99,7 +91,7 @@ git push origin v0.1.1
 %LocalAppData%\SmoothEverything\settings.json
 ```
 
-控制面板异常日志位于同目录的 `settings-crash.log`。配置字段说明见 [配置说明](docs/configuration.md)。
+配置字段说明见 [配置说明](docs/configuration.md)。
 
 ## 安全与平台边界
 

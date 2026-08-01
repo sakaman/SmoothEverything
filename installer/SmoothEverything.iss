@@ -68,12 +68,93 @@ Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#AppExeName}"; WorkingDir: "
 [Run]
 Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(AppName, '&', '&&')}}"; WorkingDir: "{app}"; Flags: nowait postinstall skipifsilent
 
+[CustomMessages]
+english.AppStillRunning=SmoothEverything is still running. Close the control panel and tray engine, then try again.
+chinesesimplified.AppStillRunning=SmoothEverything 仍在运行。请关闭设置窗口和托盘引擎后重试。
+
 [Code]
+const
+  WM_CLOSE = $0010;
+  ControlPanelWindowClass = 'SmoothEverything.NativeControlPanel';
+  ControlPanelWindowTitle = 'SmoothEverything';
+  EngineWindowClass = 'SmoothEverything.Engine.Window.v1';
+
+function CloseWindowsByClassName(const ClassName: String): Boolean;
+var
+  Attempts: Integer;
+  Window: HWND;
+begin
+  for Attempts := 0 to 49 do
+  begin
+    Window := FindWindowByClassName(ClassName);
+    if Window = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+    PostMessage(Window, WM_CLOSE, 0, 0);
+    Sleep(100);
+  end;
+  Result := FindWindowByClassName(ClassName) = 0;
+end;
+
+function CloseWindowsByTitle(const WindowTitle: String): Boolean;
+var
+  Attempts: Integer;
+  Window: HWND;
+begin
+  for Attempts := 0 to 49 do
+  begin
+    Window := FindWindowByWindowName(WindowTitle);
+    if Window = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+    PostMessage(Window, WM_CLOSE, 0, 0);
+    Sleep(100);
+  end;
+  Result := FindWindowByWindowName(WindowTitle) = 0;
+end;
+
+function CloseSmoothEverything: Boolean;
+var
+  ControlPanelClosed: Boolean;
+  EngineClosed: Boolean;
+begin
+  { Close the UI first so its reconnect timer cannot relaunch the engine. }
+  ControlPanelClosed := CloseWindowsByTitle(ControlPanelWindowTitle);
+  ControlPanelClosed :=
+    CloseWindowsByClassName(ControlPanelWindowClass) and ControlPanelClosed;
+  EngineClosed := CloseWindowsByClassName(EngineWindowClass);
+  if ControlPanelClosed and EngineClosed then
+    Sleep(500);
+  Result := ControlPanelClosed and EngineClosed;
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  Result := '';
+  if not CloseSmoothEverything then
+    Result := CustomMessage('AppStillRunning');
+end;
+
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usUninstall then
+  begin
+    if not CloseSmoothEverything then
+    begin
+      SuppressibleMsgBox(
+        CustomMessage('AppStillRunning'),
+        mbError,
+        MB_OK,
+        IDOK);
+      Abort;
+    end;
     RegDeleteValue(
       HKCU,
       'Software\Microsoft\Windows\CurrentVersion\Run',
       'SmoothEverything');
+  end;
 end;
