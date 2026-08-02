@@ -1,5 +1,6 @@
 #pragma once
 
+#include "smootheverything/control_panel/localization.h"
 #include "smootheverything/settings.h"
 
 #include <cstdint>
@@ -8,6 +9,19 @@
 #include <string_view>
 
 namespace smootheverything::control_panel {
+
+enum class SessionStatus {
+    Connecting,
+    Disconnected,
+    Connected,
+    Applied,
+    SavedOffline,
+    SaveFailed,
+    UnableToStart,
+    WaitingForEngine,
+    Saving,
+    OfflineLocal,
+};
 
 struct EngineDiagnostics final {
     std::int64_t physical_events{};
@@ -25,13 +39,13 @@ struct SessionState final {
     AppSettings settings{DefaultSettings()};
     EngineDiagnostics diagnostics{};
     bool online{};
-    std::wstring status{L"正在连接引擎…"};
+    SessionStatus status{SessionStatus::Connecting};
     std::wstring last_error;
 };
 
 class SettingsClient final {
 public:
-    SettingsClient();
+    explicit SettingsClient(const Localizer& localizer);
 
     [[nodiscard]] const SessionState& State() const noexcept;
     [[nodiscard]] SessionState& MutableState() noexcept;
@@ -51,6 +65,7 @@ private:
     [[nodiscard]] bool ApplyResponse(std::string_view response, bool replace_settings);
     void SetWin32Error(std::wstring_view operation, unsigned long error);
 
+    const Localizer& localizer_;
     SessionState state_{};
     std::filesystem::path settings_path_;
 };

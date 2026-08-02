@@ -23,11 +23,11 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Spacing="6">
-                    <TextBlock Style="{StaticResource PageTitleStyle}" Text="诊断" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="查看引擎连接、输入计数和失败保护状态。" />
+                    <TextBlock Style="{StaticResource PageTitleStyle}" Text="Diagnostics" />
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Inspect the engine connection, input counters, and fail-open status." />
                 </StackPanel>
-                <Button Grid.Column="1" VerticalAlignment="Center" Content="启动引擎" Click="StartEngine_Click" />
-                <Button Grid.Column="2" VerticalAlignment="Center" Content="刷新" Click="Refresh_Click" />
+                <Button Grid.Column="1" VerticalAlignment="Center" Content="Start Engine" Click="StartEngine_Click" />
+                <Button Grid.Column="2" VerticalAlignment="Center" Content="Refresh" Click="Refresh_Click" />
             </Grid>
 
             <Border Style="{StaticResource SettingsCardStyle}">
@@ -45,7 +45,7 @@
             </Border>
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="本次运行统计" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Current Run Statistics" />
                 <Grid ColumnSpacing="10" RowSpacing="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -59,45 +59,45 @@
                     </Grid.RowDefinitions>
 
                     <Border Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="物理输入" /><TextBlock x:Name="PhysicalEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Physical input" /><TextBlock x:Name="PhysicalEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="已平滑" /><TextBlock x:Name="SmoothedEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Smoothed" /><TextBlock x:Name="SmoothedEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
                     <Border Grid.Column="2" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="直接放行" /><TextBlock x:Name="PassedEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Passed through" /><TextBlock x:Name="PassedEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
 
                     <Border Grid.Row="1" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="注入帧" /><TextBlock x:Name="InjectedEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Injected frames" /><TextBlock x:Name="InjectedEventsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="注入总位移" /><TextBlock x:Name="InjectedDeltaValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Injected displacement" /><TextBlock x:Name="InjectedDeltaValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="目标切换" /><TextBlock x:Name="TargetChangesValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Target changes" /><TextBlock x:Name="TargetChangesValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
 
                     <Border Grid.Row="2" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="队列溢出" /><TextBlock x:Name="QueueOverflowsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Queue overflows" /><TextBlock x:Name="QueueOverflowsValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="1" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="注入失败" /><TextBlock x:Name="InjectionFailuresValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Injection failures" /><TextBlock x:Name="InjectionFailuresValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
                     <Border Grid.Row="2" Grid.Column="2" Style="{StaticResource SettingsCardStyle}" Padding="16">
-                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="配置代次" /><TextBlock x:Name="SettingsGenerationValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
+                        <StackPanel Spacing="4"><TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Settings generation" /><TextBlock x:Name="SettingsGenerationValue" FontSize="24" FontWeight="SemiBold" /></StackPanel>
                     </Border>
                 </Grid>
             </StackPanel>
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="配置与错误" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Settings and Errors" />
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="12">
-                        <TextBlock FontWeight="SemiBold" Text="配置文件" />
+                        <TextBlock FontWeight="SemiBold" Text="Settings File" />
                         <TextBox x:Name="SettingsPathText" IsReadOnly="True" FontFamily="Cascadia Mono, Consolas" />
                         <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                        <TextBlock FontWeight="SemiBold" Text="最近错误" />
+                        <TextBlock FontWeight="SemiBold" Text="Latest Error" />
                         <TextBlock x:Name="LastErrorText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
@@ -107,8 +107,8 @@
                 IsOpen="True"
                 IsClosable="False"
                 Severity="Informational"
-                Title="失败时优先保留原生滚动"
-                Message="未知应用、事件队列已满、目标进程不可访问或注入失败时，引擎会直接放行输入，避免鼠标滚轮失效。" />
+                Title="Preserve native scrolling on failure"
+                Message="The engine passes input through when an application is unknown, the event queue is full, a target process is inaccessible, or injection fails, so the wheel continues to work." />
         </StackPanel>
         </Grid>
     </ScrollViewer>

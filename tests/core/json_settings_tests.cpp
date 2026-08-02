@@ -33,14 +33,14 @@ void Require(const bool condition, const std::string& message) {
 }
 
 void JsonRoundTripsUtf8AndEscapes() {
-    const std::string source = R"({"emoji":"\ud83d\ude80","line":"a\nb","name":"平滑滚动"})";
+    const std::string source = R"({"emoji":"\ud83d\ude80","line":"a\nb","name":"smooth 🚀"})";
     const auto parsed = ParseJson(source);
     Require(parsed.Find("emoji") != nullptr && parsed.Find("emoji")->AsString() == "🚀", "surrogate pair");
     Require(parsed.Find("line") != nullptr && parsed.Find("line")->AsString() == "a\nb", "escaped newline");
 
     const std::string serialized = SerializeJson(parsed, false);
     const auto reparsed = ParseJson(serialized);
-    Require(reparsed.Find("name") != nullptr && reparsed.Find("name")->AsString() == "平滑滚动", "UTF-8 round trip");
+    Require(reparsed.Find("name") != nullptr && reparsed.Find("name")->AsString() == "smooth 🚀", "UTF-8 round trip");
 }
 
 void JsonRejectsMalformedAndDuplicateInput() {
@@ -64,6 +64,7 @@ void JsonRejectsMalformedAndDuplicateInput() {
 void SettingsRoundTripNormalizesProfilesAndApps() {
     auto settings = DefaultSettings();
     settings.motion.animation_time_ms = 280.0;
+    settings.ui_language = "zh-CN";
     settings.excluded_apps = {"C:\\Apps\\GAME.EXE", "game.exe", "  "};
     settings.profiles = {
         AppProfile{.executable = "C:\\Tools\\EDITOR.EXE", .enabled = true},
@@ -77,6 +78,7 @@ void SettingsRoundTripNormalizesProfilesAndApps() {
     Require(parsed.value->profiles.size() == 1, "profiles must be deduplicated");
     Require(parsed.value->profiles.front().executable == "editor.exe", "profile key must normalize");
     Require(std::abs(parsed.value->motion.animation_time_ms - 280.0) < 1e-12, "motion value round trip");
+    Require(parsed.value->ui_language == "zh-CN", "UI language round trip");
 }
 
 void SettingsClampMotionAndIgnoreUnknownFields() {
@@ -84,6 +86,7 @@ void SettingsClampMotionAndIgnoreUnknownFields() {
         "schema_version": 1,
         "enabled": true,
         "future_field": {"ignored": true},
+        "system": {"ui_language": "fr-FR"},
         "motion": {
             "distance_scale": 99,
             "animation_time_ms": -1,
@@ -96,6 +99,7 @@ void SettingsClampMotionAndIgnoreUnknownFields() {
     Require(std::abs(parsed.value->motion.animation_time_ms - 1.0) < 1e-12, "duration clamp");
     Require(std::abs(parsed.value->motion.acceleration_max - 20.0) < 1e-12, "acceleration clamp");
     Require(std::abs(parsed.value->motion.tail_to_head_ratio - 0.1) < 1e-12, "tail ratio clamp");
+    Require(parsed.value->ui_language == "system", "unsupported UI language must normalize");
 }
 
 void SettingsRejectMissingOrUnsupportedSchema() {

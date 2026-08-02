@@ -30,6 +30,7 @@ struct AppSettings final {
     bool bypass_high_resolution{true};
     bool start_with_windows{false};
     bool show_tray_icon{true};
+    std::string ui_language{"system"};
     std::vector<std::string> excluded_apps;
     std::vector<AppProfile> profiles;
 };
@@ -49,6 +50,7 @@ struct ResolvedAppPolicy final {
 [[nodiscard]] SettingsParseResult ParseSettings(std::string_view json) noexcept;
 [[nodiscard]] std::string SerializeSettings(const AppSettings& settings, bool pretty = true);
 [[nodiscard]] std::string NormalizeExecutableKey(std::string_view value);
+[[nodiscard]] std::string NormalizeUiLanguage(std::string_view value);
 [[nodiscard]] ResolvedAppPolicy ResolveAppPolicy(
     const AppSettings& settings,
     std::string_view executable);

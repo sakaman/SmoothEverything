@@ -41,6 +41,7 @@ private:
     void CreateApplicationsPage();
     void CreateAdvancedPage();
     void CreateDiagnosticsPage();
+    void ApplyLocalization();
     void RecreateFonts();
     void ApplyFonts();
     void ApplyWindowAppearance();
@@ -80,8 +81,11 @@ private:
     void SyncApplicationLists();
     void SyncProfileEditor();
     void SyncAdvancedControls();
+    void SyncLanguageControl();
     void SyncDiagnostics();
     void UpdateStatus();
+    [[nodiscard]] std::wstring_view Text(std::wstring_view english) const noexcept;
+    [[nodiscard]] std::wstring_view LocalizedStatus(SessionStatus status) const noexcept;
     void UpdateMotionLabels();
     void ScheduleApply();
     void ApplyPendingChanges();
@@ -108,7 +112,8 @@ private:
     HWND window_{};
     UINT dpi_{96};
     Page current_page_{Page::Home};
-    SettingsClient client_{};
+    Localizer localizer_{};
+    SettingsClient client_;
     bool updating_{};
     bool engine_started_{};
     int connection_attempts_{};
@@ -152,6 +157,7 @@ private:
 
     std::array<HWND, 8> advanced_checks_{};
     std::array<HWND, 4> advanced_cards_{};
+    HWND language_combo_{};
 
     HWND diagnostics_status_title_{};
     HWND diagnostics_status_detail_{};

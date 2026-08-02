@@ -1,8 +1,8 @@
-# 配置说明
+# Configuration
 
-配置文件：`%LocalAppData%\SmoothEverything\settings.json`。
+Settings file: `%LocalAppData%\SmoothEverything\settings.json`.
 
-当前 schema 为 `1`。控制面板会自动保存；如需手工编辑，请先退出引擎并保留 `schema_version`。
+The current schema version is `1`. The control panel saves automatically. Before editing the file manually, exit the engine and preserve `schema_version`.
 
 ```json
 {
@@ -25,6 +25,7 @@
     "bypass_high_resolution": true
   },
   "system": {
+    "ui_language": "system",
     "start_with_windows": false,
     "show_tray_icon": true
   },
@@ -47,15 +48,19 @@
 }
 ```
 
-## 运动字段
+## Motion Fields
 
-| 字段 | 范围 | 含义 |
+| Field | Range | Meaning |
 |---|---:|---|
-| `distance_scale` | 0.1–4.0 | 每格滚轮的总位移倍率 |
-| `animation_time_ms` | 1–2000 | 单个脉冲持续时间 |
-| `acceleration_window_ms` | 0–500 | 连续输入保持加速的最大间隔 |
-| `acceleration_max` | 1–20 | 连滚加速上限 |
-| `tail_to_head_ratio` | 0.1–10 | 收尾相对起步的时间权重 |
-| `easing_enabled` | bool | 是否使用五次平滑曲线 |
+| `distance_scale` | 0.1–4.0 | Total displacement multiplier for each wheel step |
+| `animation_time_ms` | 1–2000 | Duration of one impulse |
+| `acceleration_window_ms` | 0–500 | Maximum gap that preserves repeated-scroll acceleration |
+| `acceleration_max` | 1–20 | Repeated-scroll acceleration limit |
+| `tail_to_head_ratio` | 0.1–10 | Relative timing weight of the ending versus the start |
+| `easing_enabled` | bool | Whether to use the quintic easing curve |
 
-超出范围的有限数值会被钳制；无效类型使用默认值。可执行文件字段只保留不区分大小写的基名，重复项会去除。
+Finite numbers outside these ranges are clamped; invalid types use defaults. Executable fields retain only case-insensitive basenames, and duplicates are removed.
+
+## Language Setting
+
+`system.ui_language` controls the native control panel language. Supported values are `system`, `en`, and `zh-CN`. `system` selects Simplified Chinese for a Simplified Chinese Windows locale and English otherwise. Unsupported values normalize to `system`, and missing translations fall back to English. The installer chooses its own language separately.

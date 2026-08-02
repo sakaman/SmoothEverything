@@ -79,12 +79,12 @@ public sealed partial class ApplicationsPage : Page
         var executable = AppSettingsModel.NormalizeExecutable(ExcludedInput.Text);
         if (executable.Length == 0)
         {
-            ShowMessage("请输入有效的 .exe 文件名。", InfoBarSeverity.Warning);
+            ShowMessage("Enter a valid .exe filename.", InfoBarSeverity.Warning);
             return;
         }
         if (_excluded.Contains(executable, StringComparer.OrdinalIgnoreCase))
         {
-            ShowMessage($"{executable} 已在排除列表中。", InfoBarSeverity.Informational);
+            ShowMessage($"{executable} is already in the exclusion list.", InfoBarSeverity.Informational);
             return;
         }
         _excluded.Add(executable);
@@ -123,7 +123,7 @@ public sealed partial class ApplicationsPage : Page
         var executable = AppSettingsModel.NormalizeExecutable(ProfileInput.Text);
         if (executable.Length == 0)
         {
-            ShowMessage("请输入有效的 .exe 文件名。", InfoBarSeverity.Warning);
+            ShowMessage("Enter a valid .exe filename.", InfoBarSeverity.Warning);
             return;
         }
         if (_profiles.Any(profile => string.Equals(
@@ -131,7 +131,7 @@ public sealed partial class ApplicationsPage : Page
                 executable,
                 StringComparison.OrdinalIgnoreCase)))
         {
-            ShowMessage($"{executable} 已有独立配置。", InfoBarSeverity.Informational);
+            ShowMessage($"{executable} already has an application profile.", InfoBarSeverity.Informational);
             return;
         }
 

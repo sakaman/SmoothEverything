@@ -17,15 +17,15 @@
         <Grid HorizontalAlignment="Stretch">
         <StackPanel MaxWidth="980" Margin="32,28,32,48" Spacing="22" HorizontalAlignment="Stretch">
             <StackPanel Spacing="6">
-                <TextBlock Style="{StaticResource PageTitleStyle}" Text="应用规则" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="按可执行文件名直达兼容策略。排除项优先于独立配置。" />
+            <TextBlock Style="{StaticResource PageTitleStyle}" Text="Application Rules" />
+            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Set compatibility behavior by executable name. Exclusions take precedence over profiles." />
             </StackPanel>
 
             <InfoBar x:Name="PageMessage" IsOpen="False" IsClosable="True" Severity="Informational" />
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="完全排除" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="这些应用收到未经修改的原始滚轮事件，适合游戏、远程桌面或有自带滚动引擎的软件。" TextWrapping="Wrap" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Excluded Applications" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="These applications receive unmodified wheel events, which suits games, Remote Desktop, and software with its own scrolling engine." TextWrapping="Wrap" />
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="14">
                         <Grid ColumnSpacing="8">
@@ -34,9 +34,9 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="ExcludedInput" PlaceholderText="例如 game.exe" KeyDown="ExcludedInput_KeyDown" />
-                            <Button Grid.Column="1" Content="浏览…" Tag="excluded" Click="Browse_Click" />
-                            <Button Grid.Column="2" Content="添加" Click="AddExcluded_Click" />
+                        <TextBox x:Name="ExcludedInput" PlaceholderText="For example, game.exe" KeyDown="ExcludedInput_KeyDown" />
+                        <Button Grid.Column="1" Content="Browse..." Tag="excluded" Click="Browse_Click" />
+                        <Button Grid.Column="2" Content="Add" Click="AddExcluded_Click" />
                         </Grid>
                         <ItemsControl x:Name="ExcludedItems" HorizontalContentAlignment="Stretch">
                             <ItemsControl.ItemTemplate>
@@ -49,19 +49,19 @@
                                         </Grid.ColumnDefinitions>
                                         <FontIcon Glyph="&#xE8D7;" FontSize="16" VerticalAlignment="Center" />
                                         <TextBlock Grid.Column="1" Text="{Binding}" FontFamily="Cascadia Mono, Consolas" VerticalAlignment="Center" />
-                                        <Button Grid.Column="2" Content="移除" Click="RemoveExcluded_Click" />
+                            <Button Grid.Column="2" Content="Remove" Click="RemoveExcluded_Click" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock x:Name="NoExclusionsText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="尚未排除任何应用。" />
+                    <TextBlock x:Name="NoExclusionsText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="No applications are excluded." />
                     </StackPanel>
                 </Border>
             </StackPanel>
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="独立配置" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="为单个应用覆盖全局运动参数，或开启兼容模式直接放行。" TextWrapping="Wrap" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Application Profiles" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Override global motion settings for one application or enable compatibility mode to pass input through." TextWrapping="Wrap" />
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="14">
                         <Grid ColumnSpacing="8">
@@ -70,9 +70,9 @@
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox x:Name="ProfileInput" PlaceholderText="例如 chrome.exe" KeyDown="ProfileInput_KeyDown" />
-                            <Button Grid.Column="1" Content="浏览…" Tag="profile" Click="Browse_Click" />
-                            <Button Grid.Column="2" Content="创建配置" Click="AddProfile_Click" />
+                        <TextBox x:Name="ProfileInput" PlaceholderText="For example, chrome.exe" KeyDown="ProfileInput_KeyDown" />
+                        <Button Grid.Column="1" Content="Browse..." Tag="profile" Click="Browse_Click" />
+                        <Button Grid.Column="2" Content="Create Profile" Click="AddProfile_Click" />
                         </Grid>
 
                         <ItemsControl x:Name="ProfileItems" HorizontalContentAlignment="Stretch">
@@ -95,7 +95,7 @@
                                                     <FontIcon Glyph="&#xE71D;" FontSize="16" VerticalAlignment="Center" />
                                                     <TextBlock Text="{Binding Executable}" FontFamily="Cascadia Mono, Consolas" FontWeight="SemiBold" VerticalAlignment="Center" />
                                                 </StackPanel>
-                                                <Button Grid.Column="1" Content="移除" Click="RemoveProfile_Click" />
+                                    <Button Grid.Column="1" Content="Remove" Click="RemoveProfile_Click" />
                                             </Grid>
 
                                             <Grid ColumnSpacing="28">
@@ -104,21 +104,21 @@
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
                                                 <ToggleSwitch
-                                                    Header="启用平滑"
+                                        Header="Enable smoothing"
                                                     IsOn="{Binding Enabled}"
                                                     Tag="enabled"
                                                     Toggled="ProfileToggle_Toggled" />
                                                 <ToggleSwitch
                                                     Grid.Column="1"
-                                                    Header="兼容模式"
+                                        Header="Compatibility mode"
                                                     IsOn="{Binding CompatibilityMode}"
-                                                    OffContent="使用下方参数"
-                                                    OnContent="直接放行"
+                                        OffContent="Use settings below"
+                                        OnContent="Pass through"
                                                     Tag="compatibility"
                                                     Toggled="ProfileToggle_Toggled" />
                                             </Grid>
 
-                                            <Expander Header="独立运动参数">
+                                <Expander Header="Application Motion Settings">
                                                 <Grid Padding="0,12,0,0" ColumnSpacing="16" RowSpacing="12">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
@@ -129,12 +129,12 @@
                                                         <RowDefinition Height="Auto" />
                                                         <RowDefinition Height="Auto" />
                                                     </Grid.RowDefinitions>
-                                                    <NumberBox Header="距离倍率" Minimum="0.1" Maximum="4" SmallChange="0.05" Value="{Binding Motion.DistanceScale}" Tag="distance" ValueChanged="ProfileNumberBox_ValueChanged" />
-                                                    <NumberBox Grid.Column="1" Header="动画时长 (ms)" Minimum="1" Maximum="2000" SmallChange="10" Value="{Binding Motion.AnimationTimeMs}" Tag="duration" ValueChanged="ProfileNumberBox_ValueChanged" />
-                                                    <NumberBox Grid.Column="2" Header="最大加速" Minimum="1" Maximum="20" SmallChange="0.5" Value="{Binding Motion.AccelerationMax}" Tag="acceleration" ValueChanged="ProfileNumberBox_ValueChanged" />
-                                                    <NumberBox Grid.Row="1" Header="加速窗口 (ms)" Minimum="0" Maximum="500" SmallChange="5" Value="{Binding Motion.AccelerationWindowMs}" Tag="window" ValueChanged="ProfileNumberBox_ValueChanged" />
-                                                    <NumberBox Grid.Row="1" Grid.Column="1" Header="尾 / 头比例" Minimum="0.1" Maximum="10" SmallChange="0.1" Value="{Binding Motion.TailToHeadRatio}" Tag="tail" ValueChanged="ProfileNumberBox_ValueChanged" />
-                                                    <ToggleSwitch Grid.Row="1" Grid.Column="2" Header="缓入缓出" IsOn="{Binding Motion.EasingEnabled}" Tag="easing" Toggled="ProfileToggle_Toggled" />
+                                            <NumberBox Header="Distance multiplier" Minimum="0.1" Maximum="4" SmallChange="0.05" Value="{Binding Motion.DistanceScale}" Tag="distance" ValueChanged="ProfileNumberBox_ValueChanged" />
+                                            <NumberBox Grid.Column="1" Header="Animation duration (ms)" Minimum="1" Maximum="2000" SmallChange="10" Value="{Binding Motion.AnimationTimeMs}" Tag="duration" ValueChanged="ProfileNumberBox_ValueChanged" />
+                                            <NumberBox Grid.Column="2" Header="Maximum acceleration" Minimum="1" Maximum="20" SmallChange="0.5" Value="{Binding Motion.AccelerationMax}" Tag="acceleration" ValueChanged="ProfileNumberBox_ValueChanged" />
+                                            <NumberBox Grid.Row="1" Header="Acceleration window (ms)" Minimum="0" Maximum="500" SmallChange="5" Value="{Binding Motion.AccelerationWindowMs}" Tag="window" ValueChanged="ProfileNumberBox_ValueChanged" />
+                                            <NumberBox Grid.Row="1" Grid.Column="1" Header="Tail / head ratio" Minimum="0.1" Maximum="10" SmallChange="0.1" Value="{Binding Motion.TailToHeadRatio}" Tag="tail" ValueChanged="ProfileNumberBox_ValueChanged" />
+                                            <ToggleSwitch Grid.Row="1" Grid.Column="2" Header="Easing" IsOn="{Binding Motion.EasingEnabled}" Tag="easing" Toggled="ProfileToggle_Toggled" />
                                                 </Grid>
                                             </Expander>
                                         </StackPanel>
@@ -142,7 +142,7 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                        <TextBlock x:Name="NoProfilesText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="尚未创建应用独立配置。" />
+                    <TextBlock x:Name="NoProfilesText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="No application profiles have been created." />
                     </StackPanel>
                 </Border>
             </StackPanel>

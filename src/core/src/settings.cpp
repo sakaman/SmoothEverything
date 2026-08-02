@@ -60,6 +60,8 @@ namespace {
 }
 
 void NormalizeCollection(AppSettings& settings) {
+    settings.ui_language = NormalizeUiLanguage(settings.ui_language);
+
     std::set<std::string, std::less<>> excluded;
     for (const auto& item : settings.excluded_apps) {
         std::string key = NormalizeExecutableKey(item);
@@ -125,6 +127,7 @@ SettingsParseResult ParseSettings(const std::string_view json) noexcept {
             result.start_with_windows = ReadBoolean(
                 *system, "start_with_windows", result.start_with_windows);
             result.show_tray_icon = ReadBoolean(*system, "show_tray_icon", result.show_tray_icon);
+            result.ui_language = ReadString(*system, "ui_language", result.ui_language);
         }
 
         if (const JsonValue* excluded = root.Find("excluded_apps");
@@ -203,6 +206,7 @@ std::string SerializeSettings(const AppSettings& source, const bool pretty) {
         {"system", JsonValue::Object{
             {"show_tray_icon", settings.show_tray_icon},
             {"start_with_windows", settings.start_with_windows},
+            {"ui_language", settings.ui_language},
         }},
     }};
     return SerializeJson(root, pretty);
@@ -222,6 +226,13 @@ std::string NormalizeExecutableKey(const std::string_view value) {
         }
     }
     return result;
+}
+
+std::string NormalizeUiLanguage(const std::string_view value) {
+    if (value == "en" || value == "zh-CN") {
+        return std::string(value);
+    }
+    return "system";
 }
 
 ResolvedAppPolicy ResolveAppPolicy(const AppSettings& settings, const std::string_view executable) {

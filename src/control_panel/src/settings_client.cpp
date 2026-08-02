@@ -88,7 +88,7 @@ private:
     return static_cast<std::int64_t>(number);
 }
 
-[[nodiscard]] std::wstring Win32Message(const DWORD error) {
+[[nodiscard]] std::wstring Win32Message(const DWORD error, const Localizer& localizer) {
     wchar_t* raw = nullptr;
     const DWORD length = FormatMessageW(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
@@ -100,7 +100,7 @@ private:
         0,
         nullptr);
     if (length == 0 || raw == nullptr) {
-        return L"错误代码 " + std::to_wstring(error);
+        return std::wstring(localizer.Translate(L"Error code")) + L" " + std::to_wstring(error);
     }
     std::wstring message(raw, length);
     LocalFree(raw);
@@ -178,7 +178,7 @@ std::string WideToUtf8(const std::wstring_view value) {
     return result;
 }
 
-SettingsClient::SettingsClient() {
+SettingsClient::SettingsClient(const Localizer& localizer) : localizer_(localizer) {
     PWSTR local_app_data = nullptr;
     if (SUCCEEDED(SHGetKnownFolderPath(
             FOLDERID_LocalAppData, KF_FLAG_DEFAULT, nullptr, &local_app_data)) &&
@@ -214,11 +214,11 @@ bool SettingsClient::Refresh(const unsigned long timeout_ms) {
     if (!SendRequest(R"({"op":"get_state"})", response, timeout_ms) ||
         !ApplyResponse(response, true)) {
         state_.online = false;
-        state_.status = L"未连接到引擎";
+        state_.status = SessionStatus::Disconnected;
         return false;
     }
     state_.online = true;
-    state_.status = L"引擎已连接";
+    state_.status = SessionStatus::Connected;
     return true;
 }
 
@@ -232,19 +232,19 @@ bool SettingsClient::Apply(const unsigned long timeout_ms) {
     std::string response;
     if (SendRequest(request, response, timeout_ms) && ApplyResponse(response, true)) {
         state_.online = true;
-        state_.status = L"已应用到引擎";
+        state_.status = SessionStatus::Applied;
         return true;
     }
 
     const std::wstring request_error = state_.last_error;
     if (SaveLocal()) {
         state_.online = false;
-        state_.status = L"已保存；引擎离线";
+        state_.status = SessionStatus::SavedOffline;
         state_.last_error = request_error;
         return true;
     }
     state_.online = false;
-    state_.status = L"保存失败";
+    state_.status = SessionStatus::SaveFailed;
     return false;
 }
 
@@ -253,7 +253,7 @@ bool SettingsClient::StartSiblingEngine() {
     const DWORD length = GetModuleFileNameW(
         nullptr, module.data(), static_cast<DWORD>(module.size()));
     if (length == 0 || length >= module.size()) {
-        SetWin32Error(L"获取程序目录失败", GetLastError());
+        SetWin32Error(L"Failed to get application directory", GetLastError());
         return false;
     }
 
@@ -261,8 +261,9 @@ bool SettingsClient::StartSiblingEngine() {
         std::filesystem::path(std::wstring_view(module.data(), length)).parent_path();
     const std::filesystem::path engine = directory / L"SmoothEverything.Engine.exe";
     if (!std::filesystem::exists(engine)) {
-        state_.last_error = L"在设置程序同目录中找不到 SmoothEverything.Engine.exe";
-        state_.status = L"无法启动引擎";
+        state_.last_error = std::wstring(localizer_.Translate(
+            L"SmoothEverything.Engine.exe was not found next to the control panel"));
+        state_.status = SessionStatus::UnableToStart;
         return false;
     }
 
@@ -281,13 +282,13 @@ bool SettingsClient::StartSiblingEngine() {
             directory.c_str(),
             &startup,
             &process)) {
-        SetWin32Error(L"启动引擎失败", GetLastError());
-        state_.status = L"无法启动引擎";
+        SetWin32Error(L"Failed to start engine", GetLastError());
+        state_.status = SessionStatus::UnableToStart;
         return false;
     }
     CloseHandle(process.hThread);
     CloseHandle(process.hProcess);
-    state_.status = L"正在等待引擎…";
+    state_.status = SessionStatus::WaitingForEngine;
     return true;
 }
 
@@ -306,7 +307,7 @@ bool SettingsClient::LoadLocal() {
             state_.settings = DefaultSettings();
             return true;
         }
-        SetWin32Error(L"无法读取本地配置", error);
+        SetWin32Error(L"Failed to read local settings", error);
         return false;
     }
 
@@ -315,7 +316,7 @@ bool SettingsClient::LoadLocal() {
         size.QuadPart > static_cast<LONGLONG>(kMaximumMessageBytes)) {
         const DWORD error = GetLastError();
         CloseHandle(file);
-        SetWin32Error(L"本地配置大小无效", error == ERROR_SUCCESS ? ERROR_FILE_TOO_LARGE : error);
+        SetWin32Error(L"Invalid local settings size", error == ERROR_SUCCESS ? ERROR_FILE_TOO_LARGE : error);
         return false;
     }
     std::string bytes(static_cast<std::size_t>(size.QuadPart), '\0');
@@ -327,7 +328,7 @@ bool SettingsClient::LoadLocal() {
         if (!ReadFile(file, bytes.data() + offset, request, &read, nullptr) || read == 0) {
             const DWORD error = GetLastError();
             CloseHandle(file);
-            SetWin32Error(L"无法读取本地配置", error);
+            SetWin32Error(L"Failed to read local settings", error);
             return false;
         }
         offset += read;
@@ -336,7 +337,8 @@ bool SettingsClient::LoadLocal() {
 
     const SettingsParseResult parsed = ParseSettings(bytes);
     if (!parsed.value.has_value()) {
-        state_.last_error = L"无法解析本地配置：" + Utf8ToWide(parsed.error);
+        state_.last_error = std::wstring(localizer_.Translate(L"Failed to parse local settings: ")) +
+            Utf8ToWide(parsed.error);
         state_.settings = DefaultSettings();
         return false;
     }
@@ -348,7 +350,7 @@ bool SettingsClient::SaveLocal() {
     std::error_code filesystem_error;
     std::filesystem::create_directories(settings_path_.parent_path(), filesystem_error);
     if (filesystem_error) {
-        state_.last_error = L"无法创建配置目录：" +
+        state_.last_error = std::wstring(localizer_.Translate(L"Failed to create settings directory: ")) +
             Utf8ToWide(filesystem_error.message());
         return false;
     }
@@ -363,7 +365,7 @@ bool SettingsClient::SaveLocal() {
         FILE_ATTRIBUTE_NORMAL | FILE_FLAG_WRITE_THROUGH,
         nullptr);
     if (file == INVALID_HANDLE_VALUE) {
-        SetWin32Error(L"无法创建临时配置", GetLastError());
+        SetWin32Error(L"Failed to create temporary settings file", GetLastError());
         return false;
     }
     const std::string json = SerializeSettings(state_.settings, true);
@@ -372,7 +374,7 @@ bool SettingsClient::SaveLocal() {
     CloseHandle(file);
     if (!written) {
         DeleteFileW(temporary.c_str());
-        SetWin32Error(L"无法写入配置", write_error);
+        SetWin32Error(L"Failed to write settings", write_error);
         return false;
     }
     if (!MoveFileExW(
@@ -381,7 +383,7 @@ bool SettingsClient::SaveLocal() {
             MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) {
         const DWORD error = GetLastError();
         DeleteFileW(temporary.c_str());
-        SetWin32Error(L"无法替换配置", error);
+        SetWin32Error(L"Failed to replace settings", error);
         return false;
     }
     return true;
@@ -392,11 +394,11 @@ bool SettingsClient::SendRequest(
     std::string& response,
     const unsigned long timeout_ms) {
     if (request.size() + 1U > kMaximumMessageBytes) {
-        state_.last_error = L"请求数据过大";
+        state_.last_error = std::wstring(localizer_.Translate(L"Request is too large"));
         return false;
     }
     if (!WaitNamedPipeW(kPipePath, timeout_ms)) {
-        SetWin32Error(L"连接引擎失败", GetLastError());
+        SetWin32Error(L"Failed to connect to engine", GetLastError());
         return false;
     }
     const UniqueHandle pipe(CreateFileW(
@@ -408,7 +410,7 @@ bool SettingsClient::SendRequest(
         FILE_FLAG_OVERLAPPED,
         nullptr));
     if (!pipe.Valid()) {
-        SetWin32Error(L"打开引擎管道失败", GetLastError());
+        SetWin32Error(L"Failed to open engine pipe", GetLastError());
         return false;
     }
 
@@ -426,7 +428,7 @@ bool SettingsClient::SendRequest(
                 chunk,
                 written,
                 timeout_ms) || written == 0) {
-            SetWin32Error(L"向引擎发送请求失败", GetLastError());
+            SetWin32Error(L"Failed to send request to engine", GetLastError());
             return false;
         }
         offset += written;
@@ -444,7 +446,7 @@ bool SettingsClient::SendRequest(
                 static_cast<DWORD>(buffer.size()),
                 read,
                 timeout_ms) || read == 0) {
-            SetWin32Error(L"读取引擎响应失败", GetLastError());
+            SetWin32Error(L"Failed to read engine response", GetLastError());
             return false;
         }
         response.append(buffer.data(), read);
@@ -457,7 +459,7 @@ bool SettingsClient::SendRequest(
             return !response.empty();
         }
     }
-    state_.last_error = L"引擎响应超过 1 MiB 上限";
+    state_.last_error = std::wstring(localizer_.Translate(L"Engine response exceeds the 1 MiB limit"));
     return false;
 }
 
@@ -467,7 +469,7 @@ bool SettingsClient::ApplyResponse(
     try {
         const JsonValue root = ParseJson(response);
         if (!root.IsObject()) {
-            state_.last_error = L"引擎返回的数据不是 JSON 对象";
+            state_.last_error = std::wstring(localizer_.Translate(L"Engine response is not a JSON object"));
             return false;
         }
         const JsonValue* ok = root.Find("ok");
@@ -477,7 +479,7 @@ bool SettingsClient::ApplyResponse(
             : std::wstring{};
         if (ok == nullptr || !ok->IsBoolean() || !ok->AsBoolean()) {
             if (state_.last_error.empty()) {
-                state_.last_error = L"引擎拒绝了请求";
+                state_.last_error = std::wstring(localizer_.Translate(L"Engine rejected the request"));
             }
             return false;
         }
@@ -487,7 +489,8 @@ bool SettingsClient::ApplyResponse(
             if (settings != nullptr && settings->IsObject()) {
                 const SettingsParseResult parsed = ParseSettings(SerializeJson(*settings, false));
                 if (!parsed.value.has_value()) {
-                    state_.last_error = L"引擎返回了无效配置：" + Utf8ToWide(parsed.error);
+                    state_.last_error = std::wstring(localizer_.Translate(L"Engine returned invalid settings: ")) +
+                        Utf8ToWide(parsed.error);
                     return false;
                 }
                 state_.settings = *parsed.value;
@@ -510,7 +513,8 @@ bool SettingsClient::ApplyResponse(
         }
         return true;
     } catch (const std::exception& error) {
-        state_.last_error = L"引擎返回了无效数据：" + Utf8ToWide(error.what());
+        state_.last_error = std::wstring(localizer_.Translate(L"Engine returned invalid data: ")) +
+            Utf8ToWide(error.what());
         return false;
     }
 }
@@ -518,7 +522,8 @@ bool SettingsClient::ApplyResponse(
 void SettingsClient::SetWin32Error(
     const std::wstring_view operation,
     const unsigned long error) {
-    state_.last_error = std::wstring(operation) + L"：" + Win32Message(error);
+    state_.last_error = std::wstring(localizer_.Translate(operation)) + L": " +
+        Win32Message(error, localizer_);
 }
 
 }  // namespace smootheverything::control_panel

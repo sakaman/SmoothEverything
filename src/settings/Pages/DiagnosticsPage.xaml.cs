@@ -44,7 +44,7 @@ public sealed partial class DiagnosticsPage : Page
     private void UpdateView()
     {
         var diagnostics = _session.Diagnostics;
-        EngineStatusTitle.Text = _session.IsOnline ? "引擎在线" : "引擎离线";
+        EngineStatusTitle.Text = _session.IsOnline ? "Engine Online" : "Engine Offline";
         EngineStatusDetail.Text = _session.StatusText;
         EngineStatusIcon.Foreground = new SolidColorBrush(
             _session.IsOnline ? Colors.MediumSeaGreen : Colors.DarkOrange);
@@ -61,7 +61,7 @@ public sealed partial class DiagnosticsPage : Page
 
         SettingsPathText.Text = _session.SettingsFilePath;
         LastErrorText.Text = string.IsNullOrWhiteSpace(_session.LastError)
-            ? "无"
+            ? "None"
             : _session.LastError;
     }
 }

@@ -132,6 +132,8 @@ enum ControlId : int {
     AdvancedReverse,
     AdvancedStartup,
     AdvancedTray,
+    AdvancedLanguageLabel,
+    AdvancedLanguage,
 
     DiagnosticsTitle = 500,
     DiagnosticsDescription,
@@ -207,7 +209,9 @@ void SetCheck(const HWND control, const bool checked) {
 
 }  // namespace
 
-MainWindow::MainWindow(const HINSTANCE instance) : instance_(instance) {}
+MainWindow::MainWindow(const HINSTANCE instance) : instance_(instance), client_(localizer_) {
+    localizer_.SetPreference(client_.State().settings.ui_language);
+}
 
 MainWindow::~MainWindow() {
     for (const HFONT font : {font_body_, font_small_, font_title_, font_section_, font_value_, font_mono_}) {
@@ -394,6 +398,7 @@ void MainWindow::CreateUi() {
     CreateApplicationsPage();
     CreateAdvancedPage();
     CreateDiagnosticsPage();
+    ApplyLocalization();
     ApplyFonts();
     ShowPage(Page::Home);
     SyncAllControls();
@@ -401,7 +406,7 @@ void MainWindow::CreateUi() {
 
 void MainWindow::CreateNavigation() {
     constexpr std::array<std::wstring_view, 4> labels{
-        L"主页", L"应用规则", L"高级", L"诊断"};
+        L"Home", L"Application Rules", L"Advanced", L"Diagnostics"};
     constexpr std::array<int, 4> identifiers{
         NavHome, NavApplications, NavAdvanced, NavDiagnostics};
     for (std::size_t index = 0; index < labels.size(); ++index) {
@@ -423,7 +428,7 @@ void MainWindow::CreateNavigation() {
     status_text_ = CreateWindowExW(
         0,
         L"STATIC",
-        L"正在连接引擎…",
+        L"Connecting to engine...",
         WS_CHILD | WS_VISIBLE | SS_LEFT | SS_CENTERIMAGE | SS_NOPREFIX,
         0,
         0,
@@ -437,43 +442,43 @@ void MainWindow::CreateNavigation() {
 }
 
 void MainWindow::CreateHomePage() {
-    CreateLabel(Page::Home, HomeTitle, L"滚动体验", font_title_);
+    CreateLabel(Page::Home, HomeTitle, L"Scrolling Experience", font_title_);
     CreateLabel(
         Page::Home,
         HomeDescription,
-        L"为传统滚轮加入连续、低延迟的原生平滑滚动。",
+        L"Add continuous, low-latency native smoothing to a traditional mouse wheel.",
         font_body_);
 
     home_cards_[0] = CreateCard(Page::Home, HomeGlobalCard);
-    CreateLabel(Page::Home, HomeGlobalTitle, L"全局平滑", font_section_, true);
+    CreateLabel(Page::Home, HomeGlobalTitle, L"Global Smoothing", font_section_, true);
     CreateLabel(
         Page::Home,
         HomeGlobalDescription,
-        L"暂停时，滚轮事件会原样交还给目标应用，不改变系统输入。",
+        L"When paused, wheel events pass through to the target application unchanged.",
         font_body_,
         true);
-    home_enabled_ = CreateCheckbox(Page::Home, HomeEnabled, L"运行中");
+    home_enabled_ = CreateCheckbox(Page::Home, HomeEnabled, L"Enabled");
 
-    CreateLabel(Page::Home, HomePresetTitle, L"手感预设", font_section_);
+    CreateLabel(Page::Home, HomePresetTitle, L"Motion Presets", font_section_);
     constexpr std::array<int, 4> preset_ids{
         HomePresetResponsive, HomePresetBalanced, HomePresetSmooth, HomePresetClassic};
     constexpr std::array<std::wstring_view, 4> preset_labels{
-        L"响应优先", L"均衡", L"丝滑长尾", L"经典手感"};
+        L"Responsive", L"Balanced", L"Smooth Tail", L"Classic"};
     for (std::size_t index = 0; index < preset_ids.size(); ++index) {
         preset_buttons_[index] = CreateButton(
             Page::Home, preset_ids[index], preset_labels[index], false);
     }
 
     home_cards_[1] = CreateCard(Page::Home, HomeMotionCard);
-    CreateLabel(Page::Home, HomeMotionTitle, L"运动参数", font_section_, true);
+    CreateLabel(Page::Home, HomeMotionTitle, L"Motion Settings", font_section_, true);
     CreateLabel(
         Page::Home,
         HomeMotionDescription,
-        L"调整会自动保存，并立即同步到后台引擎。",
+        L"Changes are saved automatically and applied to the background engine immediately.",
         font_small_,
         true);
     constexpr std::array<std::wstring_view, 5> motion_labels{
-        L"滚动距离", L"动画时长", L"连滚加速窗口", L"最大加速倍率", L"尾 / 头比例"};
+        L"Scroll distance", L"Animation duration", L"Acceleration window", L"Maximum acceleration", L"Tail / head ratio"};
     constexpr std::array<int, 5> label_ids{
         HomeMotionLabel0, HomeMotionLabel1, HomeMotionLabel2, HomeMotionLabel3, HomeMotionLabel4};
     constexpr std::array<int, 5> value_ids{
@@ -510,23 +515,23 @@ void MainWindow::CreateHomePage() {
         SendMessageW(home_sliders_[index], TBM_SETPAGESIZE, 0, 10);
         SetWindowTheme(home_sliders_[index], L"Explorer", nullptr);
     }
-    home_easing_ = CreateCheckbox(Page::Home, HomeEasing, L"启用缓入缓出");
+    home_easing_ = CreateCheckbox(Page::Home, HomeEasing, L"Enable easing");
 }
 
 void MainWindow::CreateApplicationsPage() {
-    CreateLabel(Page::Applications, ApplicationsTitle, L"应用规则", font_title_);
+    CreateLabel(Page::Applications, ApplicationsTitle, L"Application Rules", font_title_);
     CreateLabel(
         Page::Applications,
         ApplicationsDescription,
-        L"按可执行文件名设置兼容策略；排除项优先于独立配置。",
+        L"Set compatibility behavior by executable name; exclusions take precedence over profiles.",
         font_body_);
 
     application_cards_[0] = CreateCard(Page::Applications, ExcludedCard);
-    CreateLabel(Page::Applications, ExcludedTitle, L"完全排除", font_section_, true);
+    CreateLabel(Page::Applications, ExcludedTitle, L"Excluded Applications", font_section_, true);
     CreateLabel(
         Page::Applications,
         ExcludedDescription,
-        L"游戏、远程桌面或自带滚动引擎的软件将收到原始滚轮事件。",
+        L"Games, Remote Desktop, and applications with their own scrolling receive raw wheel events.",
         font_small_,
         true);
     excluded_edit_ = CreateWindowExW(
@@ -541,9 +546,9 @@ void MainWindow::CreateApplicationsPage() {
         nullptr);
     controls_[ExcludedEdit] = excluded_edit_;
     AddPageControl(Page::Applications, excluded_edit_, true);
-    SendMessageW(excluded_edit_, EM_SETCUEBANNER, TRUE, reinterpret_cast<LPARAM>(L"例如 game.exe"));
-    CreateButton(Page::Applications, ExcludedBrowse, L"浏览…", true);
-    CreateButton(Page::Applications, ExcludedAdd, L"添加", true);
+    SendMessageW(excluded_edit_, EM_SETCUEBANNER, TRUE, reinterpret_cast<LPARAM>(L"For example, game.exe"));
+    CreateButton(Page::Applications, ExcludedBrowse, L"Browse...", true);
+    CreateButton(Page::Applications, ExcludedAdd, L"Add", true);
     excluded_list_ = CreateWindowExW(
         WS_EX_CLIENTEDGE,
         L"LISTBOX",
@@ -556,14 +561,14 @@ void MainWindow::CreateApplicationsPage() {
         nullptr);
     controls_[ExcludedList] = excluded_list_;
     AddPageControl(Page::Applications, excluded_list_, true);
-    CreateButton(Page::Applications, ExcludedRemove, L"移除所选", true);
+    CreateButton(Page::Applications, ExcludedRemove, L"Remove Selected", true);
 
     application_cards_[1] = CreateCard(Page::Applications, ProfileCard);
-    CreateLabel(Page::Applications, ProfileTitle, L"独立配置", font_section_, true);
+    CreateLabel(Page::Applications, ProfileTitle, L"Application Profiles", font_section_, true);
     CreateLabel(
         Page::Applications,
         ProfileDescription,
-        L"覆盖全局运动参数，或开启兼容模式直接放行。",
+        L"Override global motion settings or enable compatibility mode to pass input through.",
         font_small_,
         true);
     profile_edit_ = CreateWindowExW(
@@ -578,9 +583,9 @@ void MainWindow::CreateApplicationsPage() {
         nullptr);
     controls_[ProfileEdit] = profile_edit_;
     AddPageControl(Page::Applications, profile_edit_, true);
-    SendMessageW(profile_edit_, EM_SETCUEBANNER, TRUE, reinterpret_cast<LPARAM>(L"例如 chrome.exe"));
-    CreateButton(Page::Applications, ProfileBrowse, L"浏览…", true);
-    CreateButton(Page::Applications, ProfileAdd, L"创建", true);
+    SendMessageW(profile_edit_, EM_SETCUEBANNER, TRUE, reinterpret_cast<LPARAM>(L"For example, chrome.exe"));
+    CreateButton(Page::Applications, ProfileBrowse, L"Browse...", true);
+    CreateButton(Page::Applications, ProfileAdd, L"Create", true);
     profile_list_ = CreateWindowExW(
         WS_EX_CLIENTEDGE,
         L"LISTBOX",
@@ -593,19 +598,19 @@ void MainWindow::CreateApplicationsPage() {
         nullptr);
     controls_[ProfileList] = profile_list_;
     AddPageControl(Page::Applications, profile_list_, true);
-    CreateButton(Page::Applications, ProfileRemove, L"移除所选", true);
+    CreateButton(Page::Applications, ProfileRemove, L"Remove Selected", true);
     profile_editor_controls_.push_back(CreateLabel(
-        Page::Applications, ProfileEditorTitle, L"所选应用参数", font_section_, true));
-    profile_enabled_ = CreateCheckbox(Page::Applications, ProfileEnabled, L"启用平滑");
+        Page::Applications, ProfileEditorTitle, L"Selected Application Settings", font_section_, true));
+    profile_enabled_ = CreateCheckbox(Page::Applications, ProfileEnabled, L"Enable smoothing");
     profile_compatibility_ = CreateCheckbox(
-        Page::Applications, ProfileCompatibility, L"兼容模式（直接放行）");
-    profile_easing_ = CreateCheckbox(Page::Applications, ProfileEasing, L"缓入缓出");
+        Page::Applications, ProfileCompatibility, L"Compatibility mode (pass through)");
+    profile_easing_ = CreateCheckbox(Page::Applications, ProfileEasing, L"Easing");
     profile_editor_controls_.push_back(profile_enabled_);
     profile_editor_controls_.push_back(profile_compatibility_);
     profile_editor_controls_.push_back(profile_easing_);
 
     constexpr std::array<std::wstring_view, 5> labels{
-        L"距离倍率", L"动画时长 (ms)", L"加速窗口 (ms)", L"最大加速", L"尾 / 头比例"};
+        L"Distance multiplier", L"Animation duration (ms)", L"Acceleration window (ms)", L"Maximum acceleration", L"Tail / head ratio"};
     constexpr std::array<int, 5> label_ids{
         ProfileMotionLabel0, ProfileMotionLabel1, ProfileMotionLabel2,
         ProfileMotionLabel3, ProfileMotionLabel4};
@@ -632,11 +637,11 @@ void MainWindow::CreateApplicationsPage() {
 }
 
 void MainWindow::CreateAdvancedPage() {
-    CreateLabel(Page::Advanced, AdvancedTitle, L"高级", font_title_);
+    CreateLabel(Page::Advanced, AdvancedTitle, L"Advanced", font_title_);
     CreateLabel(
         Page::Advanced,
         AdvancedDescription,
-        L"输入兼容、方向与系统集成选项。",
+        L"Input compatibility, direction, and system integration options.",
         font_body_);
     constexpr std::array<int, 4> card_ids{
         AdvancedCard0, AdvancedCard1, AdvancedCard2, AdvancedCard3};
@@ -646,12 +651,12 @@ void MainWindow::CreateAdvancedPage() {
         AdvancedCardDescription0, AdvancedCardDescription1,
         AdvancedCardDescription2, AdvancedCardDescription3};
     constexpr std::array<std::wstring_view, 4> titles{
-        L"横向滚动", L"输入兼容", L"方向", L"系统集成"};
+        L"Horizontal Scrolling", L"Input Compatibility", L"Direction", L"System Integration"};
     constexpr std::array<std::wstring_view, 4> descriptions{
-        L"控制横向滚轮与 Shift 手势。",
-        L"保留缩放和高分辨率设备的原生行为。",
-        L"同时作用于纵向和横向平滑事件。",
-        L"仅使用当前用户权限，不安装系统服务。"};
+        L"Control horizontal wheel input and Shift gestures.",
+        L"Preserve native zoom and high-resolution device behavior.",
+        L"Apply direction changes to vertical and horizontal smoothing.",
+        L"Use current-user permissions only; no system service is installed."};
     for (std::size_t index = 0; index < card_ids.size(); ++index) {
         advanced_cards_[index] = CreateCard(Page::Advanced, card_ids[index]);
         CreateLabel(Page::Advanced, title_ids[index], titles[index], font_section_, true);
@@ -662,39 +667,53 @@ void MainWindow::CreateAdvancedPage() {
         AdvancedHorizontal, AdvancedShiftHorizontal, AdvancedCtrl, AdvancedAlt,
         AdvancedHighResolution, AdvancedReverse, AdvancedStartup, AdvancedTray};
     constexpr std::array<std::wstring_view, 8> check_labels{
-        L"平滑横向滚轮",
-        L"Shift + 垂直滚轮转为横向滚动",
-        L"按住 Ctrl 时直接放行",
-        L"按住 Alt 时直接放行",
-        L"绕过高分辨率输入",
-        L"反转滚动方向（自然方向）",
-        L"登录 Windows 后启动",
-        L"显示通知区域图标"};
+        L"Smooth horizontal wheel input",
+        L"Convert Shift + vertical wheel to horizontal",
+        L"Pass through while Ctrl is held",
+        L"Pass through while Alt is held",
+        L"Bypass high-resolution input",
+        L"Reverse scrolling direction (natural)",
+        L"Start after Windows sign-in",
+        L"Show notification-area icon"};
     for (std::size_t index = 0; index < check_ids.size(); ++index) {
         advanced_checks_[index] = CreateCheckbox(
             Page::Advanced, check_ids[index], check_labels[index]);
     }
+    CreateLabel(Page::Advanced, AdvancedLanguageLabel, L"Language", font_body_, true);
+    language_combo_ = CreateWindowExW(
+        0,
+        L"COMBOBOX",
+        L"",
+        WS_CHILD | WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
+        0, 0, 0, 0,
+        window_,
+        reinterpret_cast<HMENU>(static_cast<INT_PTR>(AdvancedLanguage)),
+        instance_,
+        nullptr);
+    controls_[AdvancedLanguage] = language_combo_;
+    AddPageControl(Page::Advanced, language_combo_, true);
+    SetWindowTheme(language_combo_, L"Explorer", nullptr);
 }
 
 void MainWindow::CreateDiagnosticsPage() {
-    CreateLabel(Page::Diagnostics, DiagnosticsTitle, L"诊断", font_title_);
+    CreateLabel(Page::Diagnostics, DiagnosticsTitle, L"Diagnostics", font_title_);
     CreateLabel(
         Page::Diagnostics,
         DiagnosticsDescription,
-        L"查看引擎连接、输入计数和失败保护状态。",
+        L"Inspect the engine connection, input counters, and fail-open status.",
         font_body_);
-    CreateButton(Page::Diagnostics, DiagnosticsStart, L"启动引擎");
-    CreateButton(Page::Diagnostics, DiagnosticsRefresh, L"刷新");
+    CreateButton(Page::Diagnostics, DiagnosticsStart, L"Start Engine");
+    CreateButton(Page::Diagnostics, DiagnosticsRefresh, L"Refresh");
 
     diagnostics_cards_[0] = CreateCard(Page::Diagnostics, DiagnosticsStatusCard);
     diagnostics_status_title_ = CreateLabel(
-        Page::Diagnostics, DiagnosticsStatusTitle, L"引擎离线", font_section_, true);
+        Page::Diagnostics, DiagnosticsStatusTitle, L"Engine Offline", font_section_, true);
     diagnostics_status_detail_ = CreateLabel(
-        Page::Diagnostics, DiagnosticsStatusDetail, L"正在连接…", font_body_, true);
+        Page::Diagnostics, DiagnosticsStatusDetail, L"Connecting...", font_body_, true);
 
     constexpr std::array<std::wstring_view, 9> labels{
-        L"物理输入", L"已平滑", L"直接放行", L"注入帧", L"注入总位移",
-        L"目标切换", L"队列溢出", L"注入失败", L"配置代次"};
+        L"Physical input", L"Smoothed", L"Passed through", L"Injected frames", L"Injected displacement",
+        L"Target changes", L"Queue overflows", L"Injection failures", L"Settings generation"};
     constexpr std::array<int, 9> card_ids{
         DiagnosticsStatCard0, DiagnosticsStatCard1, DiagnosticsStatCard2,
         DiagnosticsStatCard3, DiagnosticsStatCard4, DiagnosticsStatCard5,
@@ -715,7 +734,7 @@ void MainWindow::CreateDiagnosticsPage() {
     }
 
     diagnostics_cards_[10] = CreateCard(Page::Diagnostics, DiagnosticsInfoCard);
-    CreateLabel(Page::Diagnostics, DiagnosticsPathLabel, L"配置文件", font_section_, true);
+    CreateLabel(Page::Diagnostics, DiagnosticsPathLabel, L"Settings File", font_section_, true);
     diagnostics_path_ = CreateLabel(
         Page::Diagnostics,
         DiagnosticsPath,
@@ -723,9 +742,109 @@ void MainWindow::CreateDiagnosticsPage() {
         font_mono_,
         true,
         SS_LEFT | SS_NOPREFIX | SS_PATHELLIPSIS);
-    CreateLabel(Page::Diagnostics, DiagnosticsErrorLabel, L"最近错误", font_section_, true);
+    CreateLabel(Page::Diagnostics, DiagnosticsErrorLabel, L"Latest Error", font_section_, true);
     diagnostics_error_ = CreateLabel(
-        Page::Diagnostics, DiagnosticsError, L"无", font_body_, true);
+        Page::Diagnostics, DiagnosticsError, L"None", font_body_, true);
+}
+
+void MainWindow::ApplyLocalization() {
+    constexpr std::pair<int, std::wstring_view> labels[] = {
+        {NavHome, L"Home"},
+        {NavApplications, L"Application Rules"},
+        {NavAdvanced, L"Advanced"},
+        {NavDiagnostics, L"Diagnostics"},
+        {HomeTitle, L"Scrolling Experience"},
+        {HomeDescription, L"Add continuous, low-latency native smoothing to a traditional mouse wheel."},
+        {HomeGlobalTitle, L"Global Smoothing"},
+        {HomeGlobalDescription, L"When paused, wheel events pass through to the target application unchanged."},
+        {HomeEnabled, L"Enabled"},
+        {HomePresetTitle, L"Motion Presets"},
+        {HomePresetResponsive, L"Responsive"},
+        {HomePresetBalanced, L"Balanced"},
+        {HomePresetSmooth, L"Smooth Tail"},
+        {HomePresetClassic, L"Classic"},
+        {HomeMotionTitle, L"Motion Settings"},
+        {HomeMotionDescription, L"Changes are saved automatically and applied to the background engine immediately."},
+        {HomeMotionLabel0, L"Scroll distance"},
+        {HomeMotionLabel1, L"Animation duration"},
+        {HomeMotionLabel2, L"Acceleration window"},
+        {HomeMotionLabel3, L"Maximum acceleration"},
+        {HomeMotionLabel4, L"Tail / head ratio"},
+        {HomeEasing, L"Enable easing"},
+        {ApplicationsTitle, L"Application Rules"},
+        {ApplicationsDescription, L"Set compatibility behavior by executable name; exclusions take precedence over profiles."},
+        {ExcludedTitle, L"Excluded Applications"},
+        {ExcludedDescription, L"Games, Remote Desktop, and applications with their own scrolling receive raw wheel events."},
+        {ExcludedBrowse, L"Browse..."},
+        {ExcludedAdd, L"Add"},
+        {ExcludedRemove, L"Remove Selected"},
+        {ProfileTitle, L"Application Profiles"},
+        {ProfileDescription, L"Override global motion settings or enable compatibility mode to pass input through."},
+        {ProfileBrowse, L"Browse..."},
+        {ProfileAdd, L"Create"},
+        {ProfileRemove, L"Remove Selected"},
+        {ProfileEditorTitle, L"Selected Application Settings"},
+        {ProfileEnabled, L"Enable smoothing"},
+        {ProfileCompatibility, L"Compatibility mode (pass through)"},
+        {ProfileEasing, L"Easing"},
+        {ProfileMotionLabel0, L"Distance multiplier"},
+        {ProfileMotionLabel1, L"Animation duration (ms)"},
+        {ProfileMotionLabel2, L"Acceleration window (ms)"},
+        {ProfileMotionLabel3, L"Maximum acceleration"},
+        {ProfileMotionLabel4, L"Tail / head ratio"},
+        {AdvancedTitle, L"Advanced"},
+        {AdvancedDescription, L"Input compatibility, direction, and system integration options."},
+        {AdvancedCardTitle0, L"Horizontal Scrolling"},
+        {AdvancedCardTitle1, L"Input Compatibility"},
+        {AdvancedCardTitle2, L"Direction"},
+        {AdvancedCardTitle3, L"System Integration"},
+        {AdvancedCardDescription0, L"Control horizontal wheel input and Shift gestures."},
+        {AdvancedCardDescription1, L"Preserve native zoom and high-resolution device behavior."},
+        {AdvancedCardDescription2, L"Apply direction changes to vertical and horizontal smoothing."},
+        {AdvancedCardDescription3, L"Use current-user permissions only; no system service is installed."},
+        {AdvancedHorizontal, L"Smooth horizontal wheel input"},
+        {AdvancedShiftHorizontal, L"Convert Shift + vertical wheel to horizontal"},
+        {AdvancedCtrl, L"Pass through while Ctrl is held"},
+        {AdvancedAlt, L"Pass through while Alt is held"},
+        {AdvancedHighResolution, L"Bypass high-resolution input"},
+        {AdvancedReverse, L"Reverse scrolling direction (natural)"},
+        {AdvancedStartup, L"Start after Windows sign-in"},
+        {AdvancedTray, L"Show notification-area icon"},
+        {AdvancedLanguageLabel, L"Language"},
+        {DiagnosticsTitle, L"Diagnostics"},
+        {DiagnosticsDescription, L"Inspect the engine connection, input counters, and fail-open status."},
+        {DiagnosticsStart, L"Start Engine"},
+        {DiagnosticsRefresh, L"Refresh"},
+        {DiagnosticsStatLabel0, L"Physical input"},
+        {DiagnosticsStatLabel1, L"Smoothed"},
+        {DiagnosticsStatLabel2, L"Passed through"},
+        {DiagnosticsStatLabel3, L"Injected frames"},
+        {DiagnosticsStatLabel4, L"Injected displacement"},
+        {DiagnosticsStatLabel5, L"Target changes"},
+        {DiagnosticsStatLabel6, L"Queue overflows"},
+        {DiagnosticsStatLabel7, L"Injection failures"},
+        {DiagnosticsStatLabel8, L"Settings generation"},
+        {DiagnosticsPathLabel, L"Settings File"},
+        {DiagnosticsErrorLabel, L"Latest Error"},
+    };
+    for (const auto& [identifier, english] : labels) {
+        SetWindowTextW(Control(identifier), Text(english).data());
+    }
+
+    SendMessageW(
+        excluded_edit_, EM_SETCUEBANNER, TRUE,
+        reinterpret_cast<LPARAM>(Text(L"For example, game.exe").data()));
+    SendMessageW(
+        profile_edit_, EM_SETCUEBANNER, TRUE,
+        reinterpret_cast<LPARAM>(Text(L"For example, chrome.exe").data()));
+
+    SendMessageW(language_combo_, CB_RESETCONTENT, 0, 0);
+    for (const std::wstring_view option : {
+             Text(L"System default"), Text(L"English"), Text(L"Simplified Chinese")}) {
+        SendMessageW(language_combo_, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(option.data()));
+    }
+    SyncLanguageControl();
+    InvalidateRect(window_, nullptr, TRUE);
 }
 
 HWND MainWindow::CreateLabel(
@@ -993,19 +1112,19 @@ void MainWindow::LayoutApplications(
     SetBounds(Control(ExcludedBrowse), x + left_width - browse_width - add_width - Scale(24), card_y + Scale(92), browse_width, Scale(32));
     SetBounds(Control(ExcludedAdd), x + left_width - add_width - Scale(18), card_y + Scale(92), add_width, Scale(32));
     SetBounds(excluded_list_, x + Scale(18), card_y + Scale(136), left_inner, card_height - Scale(194));
-    SetBounds(Control(ExcludedRemove), x + Scale(18), card_y + card_height - Scale(46), Scale(96), Scale(30));
+    SetBounds(Control(ExcludedRemove), x + Scale(18), card_y + card_height - Scale(46), Scale(128), Scale(30));
 
     SetBounds(Control(ProfileTitle), right_x + Scale(18), card_y + Scale(15), right_width - Scale(36), Scale(24));
-    SetBounds(Control(ProfileDescription), right_x + Scale(18), card_y + Scale(43), right_width - Scale(36), Scale(24));
+    SetBounds(Control(ProfileDescription), right_x + Scale(18), card_y + Scale(43), right_width - Scale(36), Scale(42));
     const int right_inner = right_width - Scale(36);
-    SetBounds(profile_edit_, right_x + Scale(18), card_y + Scale(76), right_inner - browse_width - add_width - Scale(12), Scale(32));
-    SetBounds(Control(ProfileBrowse), right_x + right_width - browse_width - add_width - Scale(24), card_y + Scale(76), browse_width, Scale(32));
-    SetBounds(Control(ProfileAdd), right_x + right_width - add_width - Scale(18), card_y + Scale(76), add_width, Scale(32));
-    SetBounds(profile_list_, right_x + Scale(18), card_y + Scale(120), right_inner, Scale(112));
-    SetBounds(Control(ProfileRemove), right_x + Scale(18), card_y + Scale(240), Scale(96), Scale(30));
-    SetBounds(Control(ProfileEditorTitle), right_x + Scale(18), card_y + Scale(282), right_inner, Scale(24));
-    SetBounds(profile_enabled_, right_x + Scale(18), card_y + Scale(314), right_inner / 2, Scale(28));
-    SetBounds(profile_compatibility_, right_x + Scale(18) + right_inner / 2, card_y + Scale(314), right_inner / 2, Scale(34));
+    SetBounds(profile_edit_, right_x + Scale(18), card_y + Scale(92), right_inner - browse_width - add_width - Scale(12), Scale(32));
+    SetBounds(Control(ProfileBrowse), right_x + right_width - browse_width - add_width - Scale(24), card_y + Scale(92), browse_width, Scale(32));
+    SetBounds(Control(ProfileAdd), right_x + right_width - add_width - Scale(18), card_y + Scale(92), add_width, Scale(32));
+    SetBounds(profile_list_, right_x + Scale(18), card_y + Scale(136), right_inner, Scale(112));
+    SetBounds(Control(ProfileRemove), right_x + Scale(18), card_y + Scale(256), Scale(128), Scale(30));
+    SetBounds(Control(ProfileEditorTitle), right_x + Scale(18), card_y + Scale(298), right_inner, Scale(24));
+    SetBounds(profile_enabled_, right_x + Scale(18), card_y + Scale(330), right_inner / 2, Scale(28));
+    SetBounds(profile_compatibility_, right_x + Scale(18) + right_inner / 2, card_y + Scale(330), right_inner / 2, Scale(34));
 
     constexpr std::array<int, 5> label_ids{
         ProfileMotionLabel0, ProfileMotionLabel1, ProfileMotionLabel2,
@@ -1016,14 +1135,14 @@ void MainWindow::LayoutApplications(
         const int row = static_cast<int>(index / 2U);
         const int column = static_cast<int>(index % 2U);
         const int left = right_x + Scale(18) + column * (field_width + field_gap);
-        const int top = card_y + Scale(358 + row * 58);
+        const int top = card_y + Scale(374 + row * 58);
         SetBounds(Control(label_ids[index]), left, top, field_width, Scale(20));
         SetBounds(profile_motion_edits_[index], left, top + Scale(20), field_width, Scale(28));
     }
     SetBounds(
         profile_easing_,
         right_x + Scale(18) + field_width + field_gap,
-        card_y + Scale(358 + 2 * 58),
+        card_y + Scale(374 + 2 * 58),
         field_width,
         Scale(30));
 }
@@ -1068,6 +1187,11 @@ void MainWindow::LayoutAdvanced(
     SetBounds(advanced_checks_[5], left0, second_top + Scale(92), card_width - Scale(40), Scale(34));
     SetBounds(advanced_checks_[6], left1, second_top + Scale(92), card_width - Scale(40), Scale(30));
     SetBounds(advanced_checks_[7], left1, second_top + Scale(134), card_width - Scale(40), Scale(30));
+    SetBounds(
+        Control(AdvancedLanguageLabel), left1, second_top + Scale(178), Scale(90), Scale(30));
+    SetBounds(
+        language_combo_, left1 + Scale(96), second_top + Scale(174),
+        card_width - Scale(136), Scale(120));
 }
 
 void MainWindow::LayoutDiagnostics(
@@ -1137,6 +1261,8 @@ void MainWindow::ShowPage(const Page page) {
 
 void MainWindow::SyncAllControls() {
     updating_ = true;
+    localizer_.SetPreference(client_.State().settings.ui_language);
+    ApplyLocalization();
     SyncHomeControls();
     SyncApplicationLists();
     SyncAdvancedControls();
@@ -1201,7 +1327,8 @@ void MainWindow::SyncProfileEditor() {
         EnableWindow(control, enabled ? TRUE : FALSE);
     }
     if (profile == nullptr) {
-        SetWindowTextW(Control(ProfileEditorTitle), L"选择一个应用以编辑参数");
+        SetWindowTextW(
+            Control(ProfileEditorTitle), Text(L"Select an application to edit its settings").data());
         for (const HWND edit : profile_motion_edits_) {
             SetWindowTextW(edit, L"");
         }
@@ -1210,7 +1337,8 @@ void MainWindow::SyncProfileEditor() {
         SetCheck(profile_easing_, false);
         return;
     }
-    const std::wstring title = L"所选应用参数 · " + Utf8ToWide(profile->executable);
+    const std::wstring title = std::wstring(Text(L"Selected Application Settings - ")) +
+        Utf8ToWide(profile->executable);
     SetWindowTextW(Control(ProfileEditorTitle), title.c_str());
     SetCheck(profile_enabled_, profile->enabled);
     SetCheck(profile_compatibility_, profile->compatibility_mode);
@@ -1242,12 +1370,20 @@ void MainWindow::SyncAdvancedControls() {
     for (std::size_t index = 0; index < fields.size(); ++index) {
         SetCheck(advanced_checks_[index], settings.*fields[index]);
     }
+    SyncLanguageControl();
+}
+
+void MainWindow::SyncLanguageControl() {
+    const std::string& preference = client_.State().settings.ui_language;
+    const int selection = preference == "en" ? 1 : preference == "zh-CN" ? 2 : 0;
+    SendMessageW(language_combo_, CB_SETCURSEL, static_cast<WPARAM>(selection), 0);
 }
 
 void MainWindow::SyncDiagnostics() {
     const SessionState& state = client_.State();
-    SetWindowTextW(diagnostics_status_title_, state.online ? L"引擎在线" : L"引擎离线");
-    SetWindowTextW(diagnostics_status_detail_, state.status.c_str());
+    SetWindowTextW(
+        diagnostics_status_title_, Text(state.online ? L"Engine Online" : L"Engine Offline").data());
+    SetWindowTextW(diagnostics_status_detail_, LocalizedStatus(state.status).data());
     const EngineDiagnostics& diagnostics = state.diagnostics;
     const std::array<std::int64_t, 9> values{
         diagnostics.physical_events,
@@ -1267,12 +1403,33 @@ void MainWindow::SyncDiagnostics() {
     SetWindowTextW(diagnostics_path_, client_.SettingsPath().c_str());
     SetWindowTextW(
         diagnostics_error_,
-        state.last_error.empty() ? L"无" : state.last_error.c_str());
+        state.last_error.empty() ? Text(L"None").data() : state.last_error.c_str());
 }
 
 void MainWindow::UpdateStatus() {
-    SetWindowTextW(status_text_, client_.State().status.c_str());
+    SetWindowTextW(status_text_, LocalizedStatus(client_.State().status).data());
     InvalidateRect(window_, nullptr, FALSE);
+}
+
+std::wstring_view MainWindow::Text(const std::wstring_view english) const noexcept {
+    return localizer_.Translate(english);
+}
+
+std::wstring_view MainWindow::LocalizedStatus(const SessionStatus status) const noexcept {
+    switch (status) {
+    case SessionStatus::Connecting: return Text(L"Connecting to engine...");
+    case SessionStatus::Disconnected: return Text(L"Not connected to engine");
+    case SessionStatus::Connected: return Text(L"Engine connected");
+    case SessionStatus::Applied: return Text(L"Applied to engine");
+    case SessionStatus::SavedOffline: return Text(L"Saved; engine offline");
+    case SessionStatus::SaveFailed: return Text(L"Save failed");
+    case SessionStatus::UnableToStart: return Text(L"Unable to start engine");
+    case SessionStatus::WaitingForEngine: return Text(L"Waiting for engine...");
+    case SessionStatus::Saving: return Text(L"Saving changes...");
+    case SessionStatus::OfflineLocal:
+        return Text(L"Engine offline; changes will still be saved locally");
+    }
+    return Text(L"Not connected to engine");
 }
 
 void MainWindow::UpdateMotionLabels() {
@@ -1292,7 +1449,7 @@ void MainWindow::ScheduleApply() {
     if (updating_) {
         return;
     }
-    client_.MutableState().status = L"正在保存更改…";
+    client_.MutableState().status = SessionStatus::Saving;
     UpdateStatus();
     KillTimer(window_, kApplyTimer);
     SetTimer(window_, kApplyTimer, 250U, nullptr);
@@ -1330,7 +1487,7 @@ void MainWindow::PollEngineConnection() {
     }
     if (connection_attempts_ >= 25) {
         KillTimer(window_, kConnectTimer);
-        client_.MutableState().status = L"引擎离线；更改仍会保存到本机";
+        client_.MutableState().status = SessionStatus::OfflineLocal;
         UpdateStatus();
     }
 }
@@ -1341,6 +1498,24 @@ void MainWindow::HandleCommand(
     const HWND source) {
     if (identifier >= NavHome && identifier <= NavDiagnostics && notification == BN_CLICKED) {
         ShowPage(static_cast<Page>(identifier - NavHome));
+        return;
+    }
+    if (identifier == AdvancedLanguage && notification == CBN_SELCHANGE && !updating_) {
+        constexpr std::array<std::string_view, 3> preferences{"system", "en", "zh-CN"};
+        const LRESULT selection = SendMessageW(language_combo_, CB_GETCURSEL, 0, 0);
+        if (selection >= 0 && static_cast<std::size_t>(selection) < preferences.size()) {
+            client_.MutableState().settings.ui_language =
+                std::string(preferences[static_cast<std::size_t>(selection)]);
+            localizer_.SetPreference(client_.State().settings.ui_language);
+            updating_ = true;
+            ApplyLocalization();
+            SyncProfileEditor();
+            SyncDiagnostics();
+            UpdateStatus();
+            Layout();
+            updating_ = false;
+            ScheduleApply();
+        }
         return;
     }
     if (notification == BN_CLICKED) {
@@ -1466,12 +1641,16 @@ void MainWindow::ApplyPreset(const int identifier) {
 void MainWindow::AddExcludedApplication() {
     const std::string executable = NormalizeExecutableKey(WideToUtf8(WindowText(excluded_edit_)));
     if (executable.empty()) {
-        MessageBoxW(window_, L"请输入有效的 .exe 文件名。", kWindowTitle, MB_OK | MB_ICONWARNING);
+        MessageBoxW(
+            window_, Text(L"Enter a valid .exe filename.").data(),
+            kWindowTitle, MB_OK | MB_ICONWARNING);
         return;
     }
     auto& values = client_.MutableState().settings.excluded_apps;
     if (ContainsExecutable(values, executable)) {
-        MessageBoxW(window_, L"该应用已经位于排除列表中。", kWindowTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(
+            window_, Text(L"This application is already in the exclusion list.").data(),
+            kWindowTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     values.push_back(executable);
@@ -1500,7 +1679,9 @@ void MainWindow::RemoveExcludedApplication() {
 void MainWindow::AddProfile() {
     const std::string executable = NormalizeExecutableKey(WideToUtf8(WindowText(profile_edit_)));
     if (executable.empty()) {
-        MessageBoxW(window_, L"请输入有效的 .exe 文件名。", kWindowTitle, MB_OK | MB_ICONWARNING);
+        MessageBoxW(
+            window_, Text(L"Enter a valid .exe filename.").data(),
+            kWindowTitle, MB_OK | MB_ICONWARNING);
         return;
     }
     auto& profiles = client_.MutableState().settings.profiles;
@@ -1509,7 +1690,9 @@ void MainWindow::AddProfile() {
             return profile.executable == executable;
         });
     if (duplicate != profiles.end()) {
-        MessageBoxW(window_, L"该应用已经具有独立配置。", kWindowTitle, MB_OK | MB_ICONINFORMATION);
+        MessageBoxW(
+            window_, Text(L"This application already has a profile.").data(),
+            kWindowTitle, MB_OK | MB_ICONINFORMATION);
         return;
     }
     profiles.push_back(AppProfile{
@@ -1582,11 +1765,18 @@ void MainWindow::UpdateProfileFromEditor(const int identifier) {
 
 void MainWindow::BrowseExecutable(const HWND target_edit) {
     std::vector<wchar_t> path(32768U, L'\0');
-    constexpr wchar_t filter[] = L"Windows 程序 (*.exe)\0*.exe\0所有文件 (*.*)\0*.*\0\0";
+    std::wstring filter(Text(L"Windows programs (*.exe)"));
+    filter.push_back(L'\0');
+    filter.append(L"*.exe");
+    filter.push_back(L'\0');
+    filter.append(Text(L"All files (*.*)"));
+    filter.push_back(L'\0');
+    filter.append(L"*.*");
+    filter.append(2U, L'\0');
     OPENFILENAMEW dialog{};
     dialog.lStructSize = sizeof(OPENFILENAMEW);
     dialog.hwndOwner = window_;
-    dialog.lpstrFilter = filter;
+    dialog.lpstrFilter = filter.c_str();
     dialog.lpstrFile = path.data();
     dialog.nMaxFile = static_cast<DWORD>(path.size());
     dialog.lpstrDefExt = L"exe";
@@ -1668,7 +1858,7 @@ void MainWindow::Paint() {
         client.bottom};
     DrawTextW(
         buffer,
-        L"Ctrl + Alt + S  快速开关",
+        Text(L"Ctrl + Alt + S  Quick toggle").data(),
         -1,
         &shortcut,
         DT_RIGHT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);

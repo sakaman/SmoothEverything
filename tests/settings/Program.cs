@@ -36,6 +36,7 @@ static void DefaultsMatchNativeSchema()
     Require(root.GetProperty("motion").GetProperty("animation_time_ms").GetDouble() == 360.0, "duration");
     Require(root.GetProperty("input").GetProperty("pass_through_ctrl").GetBoolean(), "ctrl bypass");
     Require(root.GetProperty("system").GetProperty("show_tray_icon").GetBoolean(), "tray icon");
+    Require(root.GetProperty("system").GetProperty("ui_language").GetString() == "system", "UI language");
 }
 
 static void NormalizationClampsAndDeduplicates()
@@ -50,6 +51,7 @@ static void NormalizationClampsAndDeduplicates()
             AccelerationMax = 0,
             TailToHeadRatio = 99,
         },
+        System = new SystemSettingsModel { UiLanguage = "fr-FR" },
         ExcludedApps = [" C:\\Apps\\Game.EXE ", "game.exe", "   "],
         Profiles =
         [
@@ -64,6 +66,7 @@ static void NormalizationClampsAndDeduplicates()
     Require(settings.Motion.AccelerationWindowMs == 500, "window clamp");
     Require(settings.Motion.AccelerationMax == 1, "acceleration clamp");
     Require(settings.Motion.TailToHeadRatio == 10, "tail clamp");
+    Require(settings.System.UiLanguage == "system", "language normalization");
     Require(settings.ExcludedApps.SequenceEqual(["game.exe"]), "excluded normalization");
     Require(settings.Profiles.Count == 1 && settings.Profiles[0].Executable == "browser.exe", "profile normalization");
 }

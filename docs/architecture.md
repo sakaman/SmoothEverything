@@ -1,76 +1,76 @@
-# 架构说明
+# Architecture
 
-## 进程模型
+## Process Model
 
-SmoothEverything 由两个普通用户权限进程组成：
+SmoothEverything consists of two standard-user processes:
 
-1. `SmoothEverything.Engine.exe`：Win32/C++20 后台引擎，负责输入钩子、策略缓存、运动采样、输入注入、托盘和登录启动项。
-2. `SmoothEverything.ControlPanel.exe`：原生 C++20/Win32 控制面板，负责编辑配置、展示诊断和按需启动同目录引擎。
+1. `SmoothEverything.Engine.exe`: a Win32/C++20 background engine responsible for the input hook, policy cache, motion sampling, input injection, notification-area controls, and per-user startup.
+2. `SmoothEverything.ControlPanel.exe`: a native C++20/Win32 control panel that edits settings, displays diagnostics, and starts the colocated engine when needed.
 
-拆分的目的是让输入热路径不依赖 UI 生命周期，同时让设置界面保持现代 Windows 体验。两个进程都以 `asInvoker` 运行，并且发布包不需要 .NET 或 Windows App SDK 运行时。
+This separation keeps the input hot path independent from the UI lifecycle while preserving a native Windows settings experience. Both processes run as `asInvoker`, and release packages do not require the .NET or Windows App SDK runtimes.
 
-## 输入热路径
+## Input Hot Path
 
-`WH_MOUSE_LL` 回调执行以下有限步骤：
+The `WH_MOUSE_LL` callback performs only these bounded operations:
 
-1. 忽略本引擎注入或其他带 `LLMHF_INJECTED` 标记的事件，避免递归。
-2. 检查全局开关、修饰键、高分辨率放行和横向选项。
-3. 获取光标下的根窗口和 PID。
-4. 查询不可变的 PID 策略快照；缓存未命中时只投递解析请求，并放行本次事件。
-5. 将可平滑事件写入固定容量 SPSC 队列；队列已满时放行。
+1. Ignore events injected by this engine or marked with `LLMHF_INJECTED` to prevent recursion.
+2. Check the global toggle, modifiers, high-resolution pass-through, and horizontal-scrolling options.
+3. Find the root window and PID under the pointer.
+4. Read an immutable PID policy snapshot. On a cache miss, enqueue a resolution request and pass the current event through.
+5. Place eligible events in a fixed-capacity SPSC queue. Pass through when the queue is full.
 
-回调不读取磁盘、不打开目标进程、不解析 JSON，也不执行等待。
+The callback does not read from disk, open target processes, parse JSON, or wait.
 
-## 运动线程
+## Motion Worker
 
-运动线程优先级设为 `THREAD_PRIORITY_ABOVE_NORMAL`，使用高分辨率 waitable timer 以 8 ms 间隔采样：
+The motion worker runs at `THREAD_PRIORITY_ABOVE_NORMAL` and samples with a high-resolution waitable timer every 8 ms:
 
-- 每个物理滚轮增量形成一个独立脉冲；多个同向脉冲可以重叠。
-- 五次 smoothstep 提供连续的一阶与二阶边界，`tail_to_head_ratio` 对时间轴做头尾重映射。
-- 连续输入在配置窗口内递增加速，并受 `acceleration_max` 限制。
-- 方向改变、目标窗口改变、配置代次改变或注入失败都会取消未完成动量。
-- 帧级取整使用残差累计，确保完成的脉冲总位移守恒。
+- Each physical wheel delta creates an independent impulse; same-direction impulses may overlap.
+- Quintic smoothstep provides continuous first- and second-order boundaries, while `tail_to_head_ratio` remaps the time axis.
+- Repeated input increases acceleration within the configured window up to `acceleration_max`.
+- Direction, target window, settings generation, or injection failures cancel outstanding momentum.
+- Fractional remainders are accumulated per frame so completed impulses conserve total displacement.
 
-`SendInput` 事件带固定 `dwExtraInfo` 标记；低级钩子同时检查该标记和 `LLMHF_INJECTED`。
+`SendInput` events carry a fixed `dwExtraInfo` marker. The low-level hook checks both this marker and `LLMHF_INJECTED`.
 
-## 应用策略
+## Application Policy
 
-目标策略以 PID 为键，包含可执行文件基名、配置代次和过期时间：
+Target policies are keyed by PID and contain the executable basename, settings generation, and expiration time:
 
-- 路径解析在运动线程完成，不阻塞钩子。
-- 读取目标进程失败时缓存为直接放行。
-- 排除列表优先于独立配置。
-- 兼容模式始终放行。
-- 配置更新会增加代次并使全部策略失效。
-- 缓存最多保留 128 个 PID，默认 30 秒过期。
+- Path resolution runs on the motion thread and never blocks the hook.
+- A target that cannot be opened is cached as pass-through.
+- Exclusions take precedence over per-application profiles.
+- Compatibility mode always passes input through.
+- Settings updates advance the generation and invalidate all policies.
+- The cache stores at most 128 PIDs and expires entries after 30 seconds by default.
 
-## IPC 与配置
+## IPC and Configuration
 
-命名管道为 `\\.\pipe\SmoothEverything.Engine.v1`：
+The named pipe is `\\.\pipe\SmoothEverything.Engine.v1`:
 
-- 安全描述符只授权当前用户 SID。
-- 拒绝远程客户端。
-- 每个连接处理一行 UTF-8 JSON，请求上限 1 MiB。
-- 支持 `get_state`、`set_enabled`、`apply_settings`、`open_settings` 和 `shutdown`。
-- 管道 I/O 使用 overlapped 操作，并能由停止事件取消。
+- Its security descriptor grants access only to the current user SID.
+- Remote clients are rejected.
+- Each connection accepts one line of UTF-8 JSON up to 1 MiB.
+- Supported operations are `get_state`, `set_enabled`, `apply_settings`, `open_settings`, and `shutdown`.
+- Pipe I/O uses overlapped operations that can be cancelled by the stop event.
 
-配置写入同目录临时文件，`FlushFileBuffers` 后使用 `MoveFileEx` 原子替换。无效或未知 schema 不会覆盖原文件；引擎以安全默认值继续运行并在诊断状态中报告错误。
+Settings are written to a temporary file in the same directory, flushed with `FlushFileBuffers`, and atomically replaced with `MoveFileEx`. Invalid data or an unknown schema never overwrites the original file; the engine continues with safe defaults and reports the error through diagnostics.
 
-## 失败策略
+## Failure Policy
 
-设计原则是“滚动体验可以退化，滚轮不能失效”：
+The guiding rule is: scrolling quality may degrade, but the wheel must not stop working.
 
-| 条件 | 行为 |
+| Condition | Behavior |
 |---|---|
-| 未知 PID / 路径不可读 | 放行当前事件，异步解析或缓存放行 |
-| SPSC 队列已满 | 放行并增加 `queue_overflows` |
-| 光标移到其他根窗口 | 取消剩余动量 |
-| `SendInput` 部分或全部失败 | 取消手势，目标 PID 暂时标记为放行 |
-| 配置文件损坏 | 保留文件，使用默认配置并报告错误 |
-| 控制面板未运行 | 引擎继续使用当前配置 |
+| Unknown PID or unreadable path | Pass through the event; resolve asynchronously or cache pass-through |
+| Full SPSC queue | Pass through and increment `queue_overflows` |
+| Pointer moves to another root window | Cancel remaining momentum |
+| Partial or complete `SendInput` failure | Cancel the gesture and temporarily mark the target PID as pass-through |
+| Corrupted configuration | Preserve the file, use defaults, and report the error |
+| Control panel is closed | Continue running with current settings |
 
-## 测试边界
+## Test Boundaries
 
-自动化测试覆盖运动曲线、位移守恒、反向取消、JSON/schema、策略解析、原子配置写入、SPSC 队列、命名管道和工作线程生命周期。真实进程冒烟测试覆盖引擎启动、状态请求与正常退出；UI 运行检查覆盖四个原生页面及引擎连接交互。
+Automated tests cover motion curves, displacement conservation, reverse-direction cancellation, JSON/schema handling, policy resolution, atomic settings writes, the SPSC queue, the named pipe, and worker lifecycle. Process smoke tests cover engine startup, state requests, and clean shutdown. UI runtime checks cover all four native pages and engine interaction.
 
-这些验证不等于代码签名、安装器、所有鼠标驱动、管理员权限目标、远程桌面或安全桌面的生产认证。
+These checks do not constitute production certification for code signing, installer behavior, every mouse driver, elevated targets, Remote Desktop, or the secure desktop.

@@ -65,6 +65,9 @@ public sealed class InputSettingsModel
 
 public sealed class SystemSettingsModel
 {
+    [JsonPropertyName("ui_language")]
+    public string UiLanguage { get; set; } = "system";
+
     [JsonPropertyName("start_with_windows")]
     public bool StartWithWindows { get; set; }
 
@@ -114,6 +117,7 @@ public sealed class AppSettingsModel
     {
         SchemaVersion = 1;
         Motion.Normalize();
+        System.UiLanguage = NormalizeUiLanguage(System.UiLanguage);
 
         ExcludedApps = ExcludedApps
             .Select(NormalizeExecutable)
@@ -146,6 +150,13 @@ public sealed class AppSettingsModel
             return string.Empty;
         }
     }
+
+    public static string NormalizeUiLanguage(string? value) => value switch
+    {
+        "en" => "en",
+        "zh-CN" => "zh-CN",
+        _ => "system",
+    };
 }
 
 public sealed class EngineDiagnosticsModel

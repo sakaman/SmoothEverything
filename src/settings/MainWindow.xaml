@@ -54,16 +54,16 @@
             SelectionFollowsFocus="Enabled"
             SelectionChanged="Navigation_SelectionChanged">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="主页" IsSelected="True" Tag="home" ToolTipService.ToolTip="主页">
+                <NavigationViewItem Content="Home" IsSelected="True" Tag="home" ToolTipService.ToolTip="Home">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE80F;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="应用规则" Tag="applications" ToolTipService.ToolTip="应用规则">
+                <NavigationViewItem Content="Application Rules" Tag="applications" ToolTipService.ToolTip="Application Rules">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE71D;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="高级" Tag="advanced" ToolTipService.ToolTip="高级">
+                <NavigationViewItem Content="Advanced" Tag="advanced" ToolTipService.ToolTip="Advanced">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE713;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="诊断" Tag="diagnostics" ToolTipService.ToolTip="诊断">
+                <NavigationViewItem Content="Diagnostics" Tag="diagnostics" ToolTipService.ToolTip="Diagnostics">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE9D9;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
@@ -100,7 +100,7 @@
                     VerticalAlignment="Center"
                     FontSize="12"
                     Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                    Text="Ctrl + Alt + S  快速开关" />
+                            Text="Ctrl + Alt + S  Quick toggle" />
             </Grid>
         </Border>
     </Grid>

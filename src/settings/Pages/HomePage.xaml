@@ -21,10 +21,10 @@
                 HorizontalAlignment="Stretch"
                 Spacing="22">
                 <StackPanel Spacing="6">
-                    <TextBlock Style="{StaticResource PageTitleStyle}" Text="滚动体验" />
+            <TextBlock Style="{StaticResource PageTitleStyle}" Text="Scrolling Experience" />
                     <TextBlock
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Text="为传统滚轮加入连续、低延迟的原生平滑滚动。"
+                Text="Add continuous, low-latency native smoothing to a traditional mouse wheel."
                         TextWrapping="Wrap" />
                 </StackPanel>
 
@@ -35,10 +35,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Spacing="5">
-                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="全局平滑" />
+                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Global Smoothing" />
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="暂停时，滚轮事件会原样交还给目标应用，不改变系统输入。"
+                        Text="When paused, wheel events pass through to the target application unchanged."
                                 TextWrapping="Wrap" />
                         </StackPanel>
                         <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="5">
@@ -46,19 +46,19 @@
                                 HorizontalAlignment="Right"
                                 FontSize="12"
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="引擎状态" />
+                        Text="Engine Status" />
                             <ToggleSwitch
                                 x:Name="EnabledToggle"
                                 HorizontalAlignment="Right"
-                                OffContent="已暂停"
-                                OnContent="运行中"
+                        OffContent="Paused"
+                        OnContent="Enabled"
                                 Toggled="EnabledToggle_Toggled" />
                         </StackPanel>
                     </Grid>
                 </Border>
 
                 <StackPanel Spacing="10">
-                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="手感预设" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Motion Presets" />
                     <Grid ColumnSpacing="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -66,20 +66,20 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Button Style="{StaticResource PresetButtonStyle}" Content="响应优先" Tag="responsive" Click="Preset_Click" />
-                        <Button Grid.Column="1" Style="{StaticResource PresetButtonStyle}" Content="均衡" Tag="balanced" Click="Preset_Click" />
-                        <Button Grid.Column="2" Style="{StaticResource PresetButtonStyle}" Content="丝滑长尾" Tag="smooth" Click="Preset_Click" />
-                        <Button Grid.Column="3" Style="{StaticResource PresetButtonStyle}" Content="经典手感" Tag="classic" Click="Preset_Click" />
+                        <Button Style="{StaticResource PresetButtonStyle}" Content="Responsive" Tag="responsive" Click="Preset_Click" />
+                        <Button Grid.Column="1" Style="{StaticResource PresetButtonStyle}" Content="Balanced" Tag="balanced" Click="Preset_Click" />
+                        <Button Grid.Column="2" Style="{StaticResource PresetButtonStyle}" Content="Smooth Tail" Tag="smooth" Click="Preset_Click" />
+                        <Button Grid.Column="3" Style="{StaticResource PresetButtonStyle}" Content="Classic" Tag="classic" Click="Preset_Click" />
                     </Grid>
                 </StackPanel>
 
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="20">
                         <StackPanel Spacing="4">
-                            <TextBlock Style="{StaticResource SectionTitleStyle}" Text="运动参数" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Motion Settings" />
                             <TextBlock
                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                Text="调整会自动保存，并立即同步到后台引擎。" />
+                    Text="Changes are saved automatically and applied to the background engine immediately." />
                         </StackPanel>
 
                         <Grid ColumnSpacing="32" RowSpacing="22">
@@ -96,12 +96,12 @@
                             <StackPanel Spacing="4">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="滚动距离" />
+                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="Scroll distance" />
                                     <Border Grid.Column="1" Style="{StaticResource ValuePillStyle}"><TextBlock x:Name="DistanceValue" FontSize="12" FontWeight="SemiBold" /></Border>
                                 </Grid>
                                 <Slider
                                     x:Name="DistanceSlider"
-                                    AutomationProperties.Name="滚动距离"
+                                    AutomationProperties.Name="Scroll distance"
                                     Maximum="4"
                                     Minimum="0.1"
                                     StepFrequency="0.05"
@@ -112,12 +112,12 @@
                             <StackPanel Grid.Column="1" Spacing="4">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="动画时长" />
+                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="Animation duration" />
                                     <Border Grid.Column="1" Style="{StaticResource ValuePillStyle}"><TextBlock x:Name="DurationValue" FontSize="12" FontWeight="SemiBold" /></Border>
                                 </Grid>
                                 <Slider
                                     x:Name="DurationSlider"
-                                    AutomationProperties.Name="动画时长"
+                                    AutomationProperties.Name="Animation duration"
                                     Maximum="1000"
                                     Minimum="40"
                                     StepFrequency="10"
@@ -128,12 +128,12 @@
                             <StackPanel Grid.Row="1" Spacing="4">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="连滚加速窗口" />
+                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="Acceleration window" />
                                     <Border Grid.Column="1" Style="{StaticResource ValuePillStyle}"><TextBlock x:Name="AccelerationWindowValue" FontSize="12" FontWeight="SemiBold" /></Border>
                                 </Grid>
                                 <Slider
                                     x:Name="AccelerationWindowSlider"
-                                    AutomationProperties.Name="连滚加速窗口"
+                                    AutomationProperties.Name="Acceleration window"
                                     Maximum="300"
                                     Minimum="0"
                                     StepFrequency="5"
@@ -143,12 +143,12 @@
                             <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="最大加速倍率" />
+                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="Maximum acceleration" />
                                     <Border Grid.Column="1" Style="{StaticResource ValuePillStyle}"><TextBlock x:Name="AccelerationMaxValue" FontSize="12" FontWeight="SemiBold" /></Border>
                                 </Grid>
                                 <Slider
                                     x:Name="AccelerationMaxSlider"
-                                    AutomationProperties.Name="最大加速倍率"
+                                    AutomationProperties.Name="Maximum acceleration"
                                     Maximum="20"
                                     Minimum="1"
                                     StepFrequency="0.5"
@@ -159,12 +159,12 @@
                             <StackPanel Grid.Row="2" Spacing="4">
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="尾部 / 头部时间比" />
+                                <TextBlock VerticalAlignment="Center" FontWeight="SemiBold" Text="Tail / head ratio" />
                                     <Border Grid.Column="1" Style="{StaticResource ValuePillStyle}"><TextBlock x:Name="TailRatioValue" FontSize="12" FontWeight="SemiBold" /></Border>
                                 </Grid>
                                 <Slider
                                     x:Name="TailRatioSlider"
-                                    AutomationProperties.Name="尾部与头部时间比"
+                                    AutomationProperties.Name="Tail to head ratio"
                                     Maximum="10"
                                     Minimum="0.1"
                                     StepFrequency="0.1"
@@ -182,10 +182,10 @@
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                     <StackPanel VerticalAlignment="Center" Spacing="3">
-                                        <TextBlock FontWeight="SemiBold" Text="缓入缓出曲线" />
+                            <TextBlock FontWeight="SemiBold" Text="Easing Curve" />
                                         <TextBlock
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                            Text="让起步与收尾更自然"
+                                Text="Makes starts and endings feel more natural"
                                             TextWrapping="Wrap" />
                                     </StackPanel>
                                     <ToggleSwitch
@@ -202,19 +202,19 @@
                 </Border>
 
                 <StackPanel Spacing="10">
-                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="试滚区域" />
-                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="将鼠标移到下面的列表上滚动，可直接感受当前参数。" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Test Scrolling Area" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Move the pointer over the list below and scroll to feel the current settings." />
                     <Border Style="{StaticResource SettingsCardStyle}" Padding="8">
                         <ScrollViewer Height="230" VerticalScrollBarVisibility="Visible">
                             <StackPanel Spacing="8" Padding="8">
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="01  轻轻滚动一格，观察起步响应" /></Border>
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="02  连续滚动，观察加速叠加" /></Border>
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="03  反向滚动，旧动量会立即取消" /></Border>
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="04  调低时长可获得更直接的手感" /></Border>
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="05  增大尾部比例可获得柔和收尾" /></Border>
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="06  配置在停止操作后自动保存" /></Border>
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="07  高分辨率触控板默认直接放行" /></Border>
-                                <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="08  应用规则可覆盖全局参数" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="01  Scroll one step gently to observe the initial response" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="02  Scroll repeatedly to observe acceleration stacking" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="03  Reverse direction to cancel existing momentum immediately" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="04  Reduce duration for a more direct feel" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="05  Increase the tail ratio for a softer ending" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="06  Settings save automatically after interaction stops" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="07  High-resolution touchpad input passes through by default" /></Border>
+                        <Border Padding="16" CornerRadius="8" Background="{ThemeResource SubtleFillColorSecondaryBrush}"><TextBlock Text="08  Application rules can override global settings" /></Border>
                             </StackPanel>
                         </ScrollViewer>
                     </Border>

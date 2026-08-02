@@ -39,6 +39,48 @@ endif()
 
 add_test(NAME core.motion COMMAND SmoothEverything.CoreTests)
 
+if(WIN32)
+    add_executable(
+        SmoothEverything.LocalizationTests
+        control_panel/localization_tests.cpp
+        ${PROJECT_SOURCE_DIR}/src/control_panel/src/localization.cpp
+    )
+    target_include_directories(
+        SmoothEverything.LocalizationTests
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/src/control_panel/include
+    )
+    target_compile_definitions(
+        SmoothEverything.LocalizationTests
+        PRIVATE
+            UNICODE
+            _UNICODE
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+    )
+    if(MSVC)
+        target_compile_options(SmoothEverything.LocalizationTests PRIVATE /W4 /permissive- /utf-8)
+    else()
+        target_compile_options(
+            SmoothEverything.LocalizationTests
+            PRIVATE
+                -Wall
+                -Wextra
+                -Wpedantic
+                -Wconversion
+                -Wsign-conversion
+        )
+        target_link_options(
+            SmoothEverything.LocalizationTests
+            PRIVATE
+                -static
+                -static-libgcc
+                -static-libstdc++
+        )
+    endif()
+    add_test(NAME control_panel.localization COMMAND SmoothEverything.LocalizationTests)
+endif()
+
 if(WIN32 AND TARGET SmoothEverything.EngineLib)
     add_executable(
         SmoothEverything.EngineTests

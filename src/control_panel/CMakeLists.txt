@@ -1,5 +1,6 @@
 set(SE_CONTROL_PANEL_SOURCES
     src/main.cpp
+    src/localization.cpp
     src/main_window.cpp
     src/settings_client.cpp
 )

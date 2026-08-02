@@ -17,27 +17,27 @@
         <Grid HorizontalAlignment="Stretch">
         <StackPanel MaxWidth="980" Margin="32,28,32,48" Spacing="22" HorizontalAlignment="Stretch">
             <StackPanel Spacing="6">
-                <TextBlock Style="{StaticResource PageTitleStyle}" Text="高级" />
-                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="输入兼容、方向与系统集成选项。" />
+            <TextBlock Style="{StaticResource PageTitleStyle}" Text="Advanced" />
+            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Input compatibility, direction, and system integration options." />
             </StackPanel>
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="横向滚动" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Horizontal Scrolling" />
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="18">
                         <ToggleSwitch
                             x:Name="HorizontalToggle"
-                            Header="平滑横向滚轮"
-                            OffContent="原样放行"
-                            OnContent="启用"
+                    Header="Smooth horizontal wheel input"
+                    OffContent="Pass through"
+                    OnContent="Enabled"
                             Tag="horizontal"
                             Toggled="SettingToggle_Toggled" />
                         <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
                         <ToggleSwitch
                             x:Name="ShiftHorizontalToggle"
-                            Header="Shift + 垂直滚轮转为横向滚动"
-                            OffContent="关闭"
-                            OnContent="启用"
+                    Header="Convert Shift + vertical wheel to horizontal"
+                    OffContent="Disabled"
+                    OnContent="Enabled"
                             Tag="shift-horizontal"
                             Toggled="SettingToggle_Toggled" />
                     </StackPanel>
@@ -45,75 +45,75 @@
             </StackPanel>
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="输入兼容" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Input Compatibility" />
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="18">
                         <ToggleSwitch
                             x:Name="CtrlPassToggle"
-                            Header="按住 Ctrl 时直接放行"
-                            OffContent="仍平滑"
-                            OnContent="直接放行"
+                    Header="Pass through while Ctrl is held"
+                    OffContent="Smooth"
+                    OnContent="Pass through"
                             Tag="ctrl"
                             Toggled="SettingToggle_Toggled" />
-                        <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="保留浏览器缩放、画布缩放等 Ctrl + 滚轮操作。" TextWrapping="Wrap" />
+                <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Preserves Ctrl + wheel actions such as browser and canvas zoom." TextWrapping="Wrap" />
                         <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
                         <ToggleSwitch
                             x:Name="AltPassToggle"
-                            Header="按住 Alt 时直接放行"
-                            OffContent="仍平滑"
-                            OnContent="直接放行"
+                    Header="Pass through while Alt is held"
+                    OffContent="Smooth"
+                    OnContent="Pass through"
                             Tag="alt"
                             Toggled="SettingToggle_Toggled" />
                         <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
                         <ToggleSwitch
                             x:Name="HighResolutionToggle"
-                            Header="绕过高分辨率输入"
-                            OffContent="统一平滑"
-                            OnContent="直接放行"
+                    Header="Bypass high-resolution input"
+                    OffContent="Smooth all input"
+                    OnContent="Pass through"
                             Tag="high-resolution"
                             Toggled="SettingToggle_Toggled" />
-                        <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="小于标准滚轮刻度的精细输入通常已由触控板或鼠标固件平滑，默认不做二次处理。" TextWrapping="Wrap" />
+                <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Fine input below a standard wheel step is usually smoothed by the touchpad or mouse firmware and passes through by default." TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
             </StackPanel>
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="方向" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Direction" />
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="8">
                         <ToggleSwitch
                             x:Name="ReverseToggle"
-                            Header="反转滚动方向"
-                            OffContent="传统方向"
-                            OnContent="自然方向"
+                    Header="Reverse scrolling direction"
+                    OffContent="Traditional"
+                    OnContent="Natural"
                             Tag="reverse"
                             Toggled="SettingToggle_Toggled" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="同时作用于纵向和横向的平滑事件。" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Applies to vertical and horizontal smoothed events." />
                     </StackPanel>
                 </Border>
             </StackPanel>
 
             <StackPanel Spacing="10">
-                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="系统集成" />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="System Integration" />
                 <Border Style="{StaticResource SettingsCardStyle}">
                     <StackPanel Spacing="18">
                         <ToggleSwitch
                             x:Name="StartupToggle"
-                            Header="登录 Windows 后启动"
-                            OffContent="手动启动"
-                            OnContent="自动启动"
+                    Header="Start after Windows sign-in"
+                    OffContent="Manual"
+                    OnContent="Automatic"
                             Tag="startup"
                             Toggled="SettingToggle_Toggled" />
-                        <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="使用当前用户的登录启动项，不安装系统服务，也不需要管理员权限。" TextWrapping="Wrap" />
+                <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Uses a per-user startup entry without installing a system service or requiring administrator privileges." TextWrapping="Wrap" />
                         <Rectangle Height="1" Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
                         <ToggleSwitch
                             x:Name="TrayToggle"
-                            Header="显示通知区域图标"
-                            OffContent="隐藏"
-                            OnContent="显示"
+                    Header="Show notification-area icon"
+                    OffContent="Hidden"
+                    OnContent="Shown"
                             Tag="tray"
                             Toggled="SettingToggle_Toggled" />
-                        <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="托盘菜单提供启用、打开设置和退出；Ctrl + Alt + S 可随时切换。" TextWrapping="Wrap" />
+                <TextBlock Margin="0,-12,0,0" Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="The tray menu provides enable, settings, and exit commands; Ctrl + Alt + S toggles smoothing at any time." TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
             </StackPanel>

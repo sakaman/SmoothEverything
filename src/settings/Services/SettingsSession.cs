@@ -27,7 +27,7 @@ public sealed class SettingsSession
     public AppSettingsModel Current { get; private set; } = new();
     public EngineDiagnosticsModel Diagnostics { get; private set; } = new();
     public bool IsOnline { get; private set; }
-    public string StatusText { get; private set; } = "正在连接引擎…";
+    public string StatusText { get; private set; } = "Connecting to engine...";
     public string LastError { get; private set; } = string.Empty;
     public string SettingsFilePath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -65,7 +65,7 @@ public sealed class SettingsSession
 
         await LoadLocalAsync().ConfigureAwait(true);
         IsOnline = false;
-        StatusText = "引擎离线；更改仍会保存到本机";
+                StatusText = "Engine offline; changes will still be saved locally";
         RaiseStateChanged();
     }
 
@@ -74,7 +74,7 @@ public sealed class SettingsSession
         if (!await TryRefreshAsync(replaceSettings: true).ConfigureAwait(true))
         {
             IsOnline = false;
-            StatusText = "未连接到引擎";
+        StatusText = "Not connected to engine";
             RaiseStateChanged();
         }
     }
@@ -89,8 +89,8 @@ public sealed class SettingsSession
         if (!TryStartSiblingEngine())
         {
             IsOnline = false;
-            LastError = "在设置程序同目录中找不到 SmoothEverything.Engine.exe";
-            StatusText = "无法启动引擎";
+            LastError = "SmoothEverything.Engine.exe was not found next to the settings application";
+            StatusText = "Unable to start engine";
             RaiseStateChanged();
             return;
         }
@@ -105,8 +105,8 @@ public sealed class SettingsSession
         }
 
         IsOnline = false;
-        LastError = "引擎启动后未能建立命名管道连接";
-        StatusText = "引擎连接超时";
+            LastError = "The named-pipe connection was not established after the engine started";
+            StatusText = "Engine connection timed out";
         RaiseStateChanged();
     }
 
@@ -121,7 +121,7 @@ public sealed class SettingsSession
             cancellation = _debounceCancellation;
         }
 
-        StatusText = "正在保存更改…";
+        StatusText = "Saving changes...";
         RaiseStateChanged();
         _ = ApplyAfterDelayAsync(cancellation.Token);
     }
@@ -139,7 +139,7 @@ public sealed class SettingsSession
                 IsOnline = true;
                 Diagnostics = response.Diagnostics ?? Diagnostics;
                 LastError = response.Error;
-                StatusText = "已应用到引擎";
+            StatusText = "Applied to engine";
                 RaiseStateChanged();
                 return;
             }
@@ -147,14 +147,14 @@ public sealed class SettingsSession
             await SaveLocalAtomicAsync().ConfigureAwait(true);
             IsOnline = false;
             LastError = response?.Error ?? LastError;
-            StatusText = "已保存；引擎离线";
+                StatusText = "Saved; engine offline";
             RaiseStateChanged();
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
             IsOnline = false;
             LastError = error.Message;
-            StatusText = "保存失败";
+            StatusText = "Save failed";
             RaiseStateChanged();
         }
         finally
@@ -191,7 +191,7 @@ public sealed class SettingsSession
         Diagnostics = response.Diagnostics ?? Diagnostics;
         IsOnline = true;
         LastError = response.Error;
-        StatusText = "引擎已连接";
+            StatusText = "Engine connected";
         RaiseStateChanged();
         return true;
     }
@@ -229,12 +229,12 @@ public sealed class SettingsSession
         }
         catch (Exception error) when (error is IOException or TimeoutException or OperationCanceledException)
         {
-            LastError = error is OperationCanceledException ? "连接引擎超时" : error.Message;
+            LastError = error is OperationCanceledException ? "Engine connection timed out" : error.Message;
             return null;
         }
         catch (JsonException error)
         {
-            LastError = $"引擎返回了无效数据：{error.Message}";
+            LastError = $"Engine returned invalid data: {error.Message}";
             return null;
         }
     }
@@ -259,7 +259,7 @@ public sealed class SettingsSession
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or JsonException)
         {
-            LastError = $"无法读取本地配置：{error.Message}";
+            LastError = $"Failed to read local settings: {error.Message}";
             Current = new AppSettingsModel();
         }
     }
