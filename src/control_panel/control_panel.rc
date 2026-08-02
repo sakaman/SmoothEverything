@@ -8,7 +8,7 @@
 #define SE_VERSION_MINOR 1
 #endif
 #ifndef SE_VERSION_PATCH
-#define SE_VERSION_PATCH 1
+#define SE_VERSION_PATCH 3
 #endif
 
 #define SE_STRINGIFY_IMPL(value) #value

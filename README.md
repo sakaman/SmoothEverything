@@ -2,7 +2,7 @@
 
 SmoothEverything is a native mouse-wheel smoothing utility for Windows 10 and 11. Its low-latency Win32 background engine captures traditional wheel input, produces smooth frames at 125 Hz on a dedicated worker thread, and exposes a native C++/Win32 control panel for motion tuning, application rules, and diagnostics.
 
-Current version: `0.1.2` (x64).
+Current version: `0.1.3` (x64).
 
 ## Features
 
@@ -53,7 +53,7 @@ pwsh .\scripts\Setup-Toolchain.ps1 -IncludeInstaller
 Create a self-contained x64 installer and portable archive:
 
 ```powershell
-pwsh .\scripts\Publish.ps1 -Version 0.1.2
+pwsh .\scripts\Publish.ps1 -Version 0.1.3
 ```
 
 Outputs:
@@ -71,8 +71,8 @@ The installer performs a per-user installation under `%LocalAppData%\Programs\Sm
 `main` and pull requests run `.github/workflows/ci.yml`. Pushing a `vMAJOR.MINOR.PATCH` tag starts `.github/workflows/release.yml`, which prepares the toolchain on a Windows runner, builds and tests the project, and uploads the installer, portable archive, and SHA-256 checksums:
 
 ```powershell
-git tag -a v0.1.2 -m "SmoothEverything v0.1.2"
-git push origin v0.1.2
+git tag -a v0.1.3 -m "SmoothEverything v0.1.3"
+git push origin v0.1.3
 ```
 
 The Release workflow can also be run manually from GitHub Actions for an existing version tag.
