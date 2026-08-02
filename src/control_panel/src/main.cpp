@@ -1,4 +1,5 @@
 #include "smootheverything/control_panel/main_window.h"
+#include "smootheverything/control_panel/single_instance.h"
 
 #include <windows.h>
 #include <commctrl.h>
@@ -6,6 +7,13 @@
 
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, wchar_t*, const int show_command) {
     static_cast<void>(SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2));
+
+    const smootheverything::control_panel::SingleInstance single_instance;
+    if (single_instance.AlreadyRunning()) {
+        static_cast<void>(
+            smootheverything::control_panel::ActivateExistingControlPanelWindow());
+        return 0;
+    }
 
     INITCOMMONCONTROLSEX controls{
         .dwSize = sizeof(INITCOMMONCONTROLSEX),

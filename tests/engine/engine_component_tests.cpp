@@ -1,3 +1,4 @@
+#include "smootheverything/engine/control_panel_lifecycle.h"
 #include "smootheverything/engine/motion_worker.h"
 #include "smootheverything/engine/pipe_server.h"
 #include "smootheverything/engine/runtime_state.h"
@@ -19,6 +20,7 @@
 namespace {
 
 using smootheverything::DefaultSettings;
+using smootheverything::engine::RequestControlPanelClose;
 using smootheverything::engine::MotionWorker;
 using smootheverything::engine::PipeServer;
 using smootheverything::engine::RuntimeState;
@@ -29,6 +31,21 @@ void Require(const bool condition, const std::string& message) {
     if (!condition) {
         throw std::runtime_error(message);
     }
+}
+
+int control_panel_close_count = 0;
+
+LRESULT CALLBACK ControlPanelWindowProcedure(
+    const HWND window,
+    const UINT message,
+    const WPARAM word,
+    const LPARAM data) {
+    if (message == WM_CLOSE) {
+        ++control_panel_close_count;
+        DestroyWindow(window);
+        return 0;
+    }
+    return DefWindowProcW(window, message, word, data);
 }
 
 [[nodiscard]] std::wstring TestDirectory() {
@@ -138,6 +155,39 @@ void MotionWorkerStartsAndStopsWithoutInput() {
     worker.Stop();
 }
 
+void EngineShutdownClosesEveryControlPanelWindow() {
+    const HINSTANCE instance = GetModuleHandleW(nullptr);
+    const std::wstring class_name = L"SmoothEverything.Tests.ControlPanel." +
+        std::to_wstring(GetCurrentProcessId());
+
+    WNDCLASSEXW window_class{};
+    window_class.cbSize = sizeof(WNDCLASSEXW);
+    window_class.lpfnWndProc = &ControlPanelWindowProcedure;
+    window_class.hInstance = instance;
+    window_class.lpszClassName = class_name.c_str();
+    Require(RegisterClassExW(&window_class) != 0, "register test control panel class");
+
+    const HWND first = CreateWindowExW(
+        0, class_name.c_str(), L"", WS_OVERLAPPED, 0, 0, 1, 1,
+        nullptr, nullptr, instance, nullptr);
+    const HWND second = CreateWindowExW(
+        0, class_name.c_str(), L"", WS_OVERLAPPED, 0, 0, 1, 1,
+        nullptr, nullptr, instance, nullptr);
+    Require(first != nullptr && second != nullptr, "create test control panel windows");
+
+    control_panel_close_count = 0;
+    Require(RequestControlPanelClose(class_name.c_str()) == 2, "request every panel close");
+
+    MSG message{};
+    while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE) != FALSE) {
+        TranslateMessage(&message);
+        DispatchMessageW(&message);
+    }
+    Require(control_panel_close_count == 2, "every panel receives WM_CLOSE");
+    Require(IsWindow(first) == FALSE && IsWindow(second) == FALSE, "every panel window closes");
+    Require(UnregisterClassW(class_name.c_str(), instance) != FALSE, "unregister test panel class");
+}
+
 }  // namespace
 
 int main() {
@@ -146,6 +196,7 @@ int main() {
         {"same-user named pipe", PipeServerAcceptsOnlyBoundedLineRequests},
         {"target policy generation", TargetPolicyRefreshesOnSettingsGeneration},
         {"motion worker lifecycle", MotionWorkerStartsAndStopsWithoutInput},
+        {"control panel shutdown", EngineShutdownClosesEveryControlPanelWindow},
     };
 
     int failures = 0;

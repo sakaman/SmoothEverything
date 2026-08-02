@@ -12,7 +12,7 @@ Development requires Windows 10/11 x64, PowerShell 7, Scoop, CMake, Ninja, and t
 pwsh .\scripts\Setup-Toolchain.ps1
 pwsh .\scripts\Build.ps1 -Configuration Debug
 ctest --preset debug
-pwsh .\scripts\Publish.ps1 -Version 0.1.3
+pwsh .\scripts\Publish.ps1 -Version 0.1.4
 ```
 
 `Setup-Toolchain.ps1` installs build prerequisites; add `-IncludeInstaller` for Inno Setup. `Build.ps1` configures, builds, and tests by default (`-SkipTests` is for focused iteration only). `ctest` reruns the configured suite with failures displayed. `Publish.ps1` performs a Release build and creates the installer, portable ZIP, and checksums.

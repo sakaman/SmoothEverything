@@ -1,6 +1,7 @@
 #include "smootheverything/control_panel/main_window.h"
 
 #include "smootheverything/control_panel/resource.h"
+#include "smootheverything/control_panel/single_instance.h"
 
 #include <windows.h>
 #include <commctrl.h>
@@ -22,7 +23,6 @@
 namespace smootheverything::control_panel {
 namespace {
 
-constexpr wchar_t kWindowClass[] = L"SmoothEverything.NativeControlPanel";
 constexpr wchar_t kWindowTitle[] = L"SmoothEverything";
 constexpr UINT kConnectMessage = WM_APP + 1U;
 constexpr UINT_PTR kApplyTimer = 1U;
@@ -240,7 +240,7 @@ bool MainWindow::Create(const int show_command) {
     window_class.hInstance = instance_;
     window_class.hIcon = icon_;
     window_class.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-    window_class.lpszClassName = kWindowClass;
+    window_class.lpszClassName = kControlPanelWindowClassName;
     window_class.hIconSm = icon_;
     if (RegisterClassExW(&window_class) == 0 && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) {
         return false;
@@ -252,7 +252,7 @@ bool MainWindow::Create(const int show_command) {
         &bounds, WS_OVERLAPPEDWINDOW, FALSE, 0, dpi_));
     window_ = CreateWindowExW(
         0,
-        kWindowClass,
+        kControlPanelWindowClassName,
         kWindowTitle,
         WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
         CW_USEDEFAULT,

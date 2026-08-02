@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 
-set(SE_VERSION "0.1.3" CACHE STRING "SmoothEverything release version")
+set(SE_VERSION "0.1.4" CACHE STRING "SmoothEverything release version")
 if(NOT SE_VERSION MATCHES "^[0-9]+[.][0-9]+[.][0-9]+$")
     message(FATAL_ERROR "SE_VERSION must use numeric major.minor.patch format")
 endif()

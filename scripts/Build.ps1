@@ -3,7 +3,7 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Debug',
     [ValidatePattern('^\d+\.\d+\.\d+$')]
-    [string]$Version = '0.1.3',
+    [string]$Version = '0.1.4',
     [switch]$SkipTests
 )
 

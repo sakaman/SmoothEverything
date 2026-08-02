@@ -3,6 +3,7 @@ set(SE_CONTROL_PANEL_SOURCES
     src/localization.cpp
     src/main_window.cpp
     src/settings_client.cpp
+    src/single_instance.cpp
 )
 
 add_executable(

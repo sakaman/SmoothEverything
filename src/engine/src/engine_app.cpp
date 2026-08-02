@@ -1,6 +1,7 @@
 #include "smootheverything/engine/engine_app.h"
 
 #include "smootheverything/engine/autostart.h"
+#include "smootheverything/engine/control_panel_lifecycle.h"
 #include "smootheverything/engine/resource.h"
 #include "smootheverything/json.h"
 #include "smootheverything/settings.h"
@@ -150,12 +151,12 @@ LRESULT EngineApp::OnWindowMessage(const UINT message, const WPARAM word, const 
             switch (LOWORD(word)) {
                 case kCommandToggle: ToggleEnabled(); break;
                 case kCommandSettings: OpenSettings(); break;
-                case kCommandExit: DestroyWindow(window_); break;
+                case kCommandExit: Shutdown(); break;
                 default: break;
             }
             return 0;
         case WM_CLOSE:
-            DestroyWindow(window_);
+            Shutdown();
             return 0;
         case WM_DESTROY:
             PostQuitMessage(0);
@@ -335,6 +336,13 @@ void EngineApp::OpenSettings() noexcept {
             &process)) {
         CloseHandle(process.hThread);
         CloseHandle(process.hProcess);
+    }
+}
+
+void EngineApp::Shutdown() noexcept {
+    static_cast<void>(RequestControlPanelClose());
+    if (window_ != nullptr) {
+        DestroyWindow(window_);
     }
 }
 

@@ -1,5 +1,6 @@
 set(SE_ENGINE_SOURCES
     src/autostart.cpp
+    src/control_panel_lifecycle.cpp
     src/engine_app.cpp
     src/input_hook.cpp
     src/motion_worker.cpp

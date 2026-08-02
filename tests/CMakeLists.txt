@@ -79,6 +79,48 @@ if(WIN32)
         )
     endif()
     add_test(NAME control_panel.localization COMMAND SmoothEverything.LocalizationTests)
+
+    add_executable(
+        SmoothEverything.SingleInstanceTests
+        control_panel/single_instance_tests.cpp
+        ${PROJECT_SOURCE_DIR}/src/control_panel/src/single_instance.cpp
+    )
+    target_include_directories(
+        SmoothEverything.SingleInstanceTests
+        PRIVATE
+            ${PROJECT_SOURCE_DIR}/src/control_panel/include
+            ${PROJECT_SOURCE_DIR}/src/core/include
+    )
+    target_compile_definitions(
+        SmoothEverything.SingleInstanceTests
+        PRIVATE
+            UNICODE
+            _UNICODE
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+    )
+    target_link_libraries(SmoothEverything.SingleInstanceTests PRIVATE user32)
+    if(MSVC)
+        target_compile_options(SmoothEverything.SingleInstanceTests PRIVATE /W4 /permissive-)
+    else()
+        target_compile_options(
+            SmoothEverything.SingleInstanceTests
+            PRIVATE
+                -Wall
+                -Wextra
+                -Wpedantic
+                -Wconversion
+                -Wsign-conversion
+        )
+        target_link_options(
+            SmoothEverything.SingleInstanceTests
+            PRIVATE
+                -static
+                -static-libgcc
+                -static-libstdc++
+        )
+    endif()
+    add_test(NAME control_panel.single_instance COMMAND SmoothEverything.SingleInstanceTests)
 endif()
 
 if(WIN32 AND TARGET SmoothEverything.EngineLib)

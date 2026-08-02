@@ -57,6 +57,7 @@ private:
     void RemoveTrayIcon() noexcept;
     void ShowTrayMenu() noexcept;
     void OpenSettings() noexcept;
+    void Shutdown() noexcept;
     void ToggleEnabled() noexcept;
     [[nodiscard]] bool ApplySettings(AppSettings settings, std::string& error) noexcept;
     [[nodiscard]] std::string HandlePipeRequest(std::string_view request);
